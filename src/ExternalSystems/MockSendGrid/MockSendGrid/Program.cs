@@ -17,8 +17,9 @@ public static class MockSendGridEndpoints
     private static readonly Random Random = new();
     private static int _requestCount;
     private static DateTime _quotaResetTime = DateTime.UtcNow.AddSeconds(5);
-    private const int QuotaLimit = 10;
+    private static int _quotaLimit = 10;
     private static bool _tokenInvalidated;
+    private static bool _chaosEnabled;
 
     public static void MapMockSendGridApi(this WebApplication app)
     {
@@ -29,13 +30,16 @@ public static class MockSendGridEndpoints
         admin.MapGet("/stats", GetStats);
         admin.MapPost("/reset", ResetStats);
         admin.MapPost("/invalidate-token", InvalidateToken);
+        admin.MapPost("/set-quota", SetQuota);
+        admin.MapPost("/enable-chaos", EnableChaos);
+        admin.MapPost("/disable-chaos", DisableChaos);
     }
 
     private static async Task<IResult> SendEmail([FromBody] SendGridRequest request)
     {
         await Task.Delay(Random.Next(100, 300));
 
-        if (_tokenInvalidated || Random.Next(100) < 10)
+        if (_tokenInvalidated || (_chaosEnabled && Random.Next(100) < 10))
             return Results.Json(new { errors = new[] { new { message = "Invalid API key" } } }, statusCode: 401);
 
         var toEmail = request.Personalizations?.FirstOrDefault()?.To?.FirstOrDefault()?.Email;
@@ -49,10 +53,10 @@ public static class MockSendGridEndpoints
         }
         _requestCount++;
 
-        if (_requestCount > QuotaLimit)
+        if (_requestCount > _quotaLimit)
             return new QuotaExceededResult((int)(_quotaResetTime - DateTime.UtcNow).TotalSeconds);
 
-        if (Random.Next(100) < 15)
+        if (_chaosEnabled && Random.Next(100) < 15)
             return Results.Json(new { errors = new[] { new { message = "Service unavailable" } } }, statusCode: 503);
 
         return Results.Json(new SendGridResponse { MessageId = $"msg_{Guid.NewGuid():N}" });
@@ -61,17 +65,20 @@ public static class MockSendGridEndpoints
     private static IResult GetStats() => Results.Json(new
     {
         requestCount = _requestCount,
-        quotaLimit = QuotaLimit,
-        quotaRemaining = Math.Max(0, QuotaLimit - _requestCount),
+        quotaLimit = _quotaLimit,
+        quotaRemaining = Math.Max(0, _quotaLimit - _requestCount),
         quotaResetInSeconds = (int)Math.Max(0, (_quotaResetTime - DateTime.UtcNow).TotalSeconds),
-        tokenValid = !_tokenInvalidated
+        tokenValid = !_tokenInvalidated,
+        chaosEnabled = _chaosEnabled
     });
 
     private static IResult ResetStats()
     {
         _requestCount = 0;
         _quotaResetTime = DateTime.UtcNow.AddSeconds(5);
+        _quotaLimit = 10;
         _tokenInvalidated = false;
+        _chaosEnabled = false;
         return Results.Ok(new { message = "Reset" });
     }
 
@@ -79,6 +86,26 @@ public static class MockSendGridEndpoints
     {
         _tokenInvalidated = true;
         return Results.Ok(new { message = "Token invalidated" });
+    }
+
+    private static IResult SetQuota([FromQuery] int limit)
+    {
+        _quotaLimit = limit;
+        _requestCount = 0;
+        _quotaResetTime = DateTime.UtcNow.AddSeconds(5);
+        return Results.Ok(new { message = $"Quota set to {limit}", quotaLimit = limit });
+    }
+
+    private static IResult EnableChaos()
+    {
+        _chaosEnabled = true;
+        return Results.Ok(new { message = "Chaos enabled", chaosEnabled = true });
+    }
+
+    private static IResult DisableChaos()
+    {
+        _chaosEnabled = false;
+        return Results.Ok(new { message = "Chaos disabled", chaosEnabled = false });
     }
 }
 

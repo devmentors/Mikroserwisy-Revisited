@@ -1,4 +1,7 @@
+using System.Globalization;
+using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
+using TicketFlow.CourseUtils;
 using TicketFlow.Services.SLA.Core.Data.Models;
 using TicketFlow.Services.SLA.Core.Data.Repositories;
 using TicketFlow.Services.SLA.Core.Http.Billing;
@@ -13,6 +16,7 @@ public class TicketService
 {
     private readonly ITicketsClient _ticketsClient;
     private readonly IBillingClient _billingClient;
+    private readonly DirectLegacySoapProxy _legacySoapProxy;
     private readonly ISLARepository _slaRepository;
     private readonly IMessagePublisher _publisher;
     private readonly ILogger<TicketService> _logger;
@@ -20,12 +24,14 @@ public class TicketService
     public TicketService(
         ITicketsClient ticketsClient,
         IBillingClient billingClient,
+        DirectLegacySoapProxy legacySoapProxy,
         ISLARepository slaRepository,
         IMessagePublisher publisher,
         ILogger<TicketService> logger)
     {
         _ticketsClient = ticketsClient;
         _billingClient = billingClient;
+        _legacySoapProxy = legacySoapProxy;
         _slaRepository = slaRepository;
         _publisher = publisher;
         _logger = logger;
@@ -156,6 +162,11 @@ public class TicketService
     private async Task<SLATier> DetermineEffectiveTierAsync(
         SLATier contractedTier, string domain, CancellationToken ct)
     {
+        if (FeatureFlags.UseDirectLegacyBilling)
+        {
+            return await DetermineEffectiveTierFromLegacyDirectlyAsync(contractedTier, domain, ct);
+        }
+
         var paymentStanding = await _billingClient.GetPaymentStandingAsync(domain, ct);
 
         // Graceful degradation: if billing unavailable, use contracted tier
@@ -201,9 +212,56 @@ public class TicketService
         return effectiveTier;
     }
 
-    // Downgrades tier by specified number of steps.
-    // VIP(2) -> Premium(1) -> Standard(0) -> Basic(-1)
-    // Cannot go below Basic.
+    private async Task<SLATier> DetermineEffectiveTierFromLegacyDirectlyAsync(
+        SLATier contractedTier, string domain, CancellationToken ct)
+    {
+        try
+        {
+            var xml = await _legacySoapProxy.GetCustomerInvoicesXmlAsync(domain, ct);
+
+            if (xml.Contains("<soap:Fault>"))
+            {
+                _logger.LogWarning("Legacy billing returned SOAP Fault for {Domain}", domain);
+                return contractedTier;
+            }
+
+            var doc = XDocument.Parse(xml);
+            XNamespace ns = "http://legacy.billing.corp/2005";
+            var invoiceNodes = doc.Descendants(ns + "INVOICE");
+
+            var maxDaysOverdue = 0;
+
+            foreach (var inv in invoiceNodes)
+            {
+                var statusCode = inv.Element(ns + "STS_CD")?.Value;
+                if (statusCode != "O") continue;
+
+                var dueDateStr = inv.Element(ns + "DT_DUE")?.Value;
+                if (DateTime.TryParseExact(dueDateStr, "yyyyMMdd",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out var dueDate))
+                {
+                    var daysOverdue = (DateTime.UtcNow - dueDate).Days;
+                    maxDaysOverdue = Math.Max(maxDaysOverdue, daysOverdue);
+                }
+            }
+
+            var downgradeSteps = maxDaysOverdue switch
+            {
+                >= 60 => 2,
+                >= 30 => 1,
+                _ => 0
+            };
+
+            return DowngradeTier(contractedTier, downgradeSteps);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex,
+                "Legacy billing unavailable for {Domain}. Using contracted tier.", domain);
+            return contractedTier;
+        }
+    }
+
     private static SLATier DowngradeTier(SLATier tier, int steps)
     {
         var newValue = Math.Max((int)SLATier.Basic, (int)tier - steps);

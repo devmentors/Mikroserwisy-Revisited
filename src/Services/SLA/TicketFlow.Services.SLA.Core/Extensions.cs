@@ -80,6 +80,14 @@ public static class Extensions
             builder.Timeout = TimeSpan.FromSeconds(5);
         });
 
+        services.AddHttpClient<DirectLegacySoapProxy>(builder =>
+        {
+            builder.BaseAddress = new Uri(
+                configuration.GetValue<string>("Services:LegacyBilling")
+                ?? "http://localhost:6050");
+            builder.Timeout = TimeSpan.FromSeconds(5);
+        });
+
         services.AddHostedService<SLAConsumerService>();
         services.AddHostedService<SLATopologyInitializer>();
         services.AddTransient<ISLARepository, SLARepository>();

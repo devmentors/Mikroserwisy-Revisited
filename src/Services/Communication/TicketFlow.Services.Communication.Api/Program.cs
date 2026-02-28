@@ -8,6 +8,7 @@ using TicketFlow.Services.Communication.Core.ExternalServices.Email;
 using TicketFlow.Services.Communication.Core.Http.Agents;
 using TicketFlow.Services.Communication.Core.Validators;
 using TicketFlow.CourseUtils;
+using TicketFlow.Services.Communication.Core.Messages;
 using TicketFlow.Shared.AnomalyGeneration.HttpApi;
 using TicketFlow.Shared.AspNetCore;
 using TicketFlow.Shared.Exceptions;
@@ -156,21 +157,21 @@ app.MapPut("/messages/{messageId}", async (
 
 app.MapPost("/messages", async (
     [FromBody] Message message,
-    [FromServices] CommunicationDbContext dbContext,
+    [FromServices] IMessageService messageService,
     [FromServices] IEmailService emailService,
     CancellationToken cancellationToken) =>
 {
     new MessageValidator().Validate(message);
 
+    await messageService.SaveMessageAsync(message, ct: cancellationToken);
+
     if (FeatureFlags.UseEmailNotifications)
     {
         var email = new EmailMessage(message.RecipentEmail, message.Title, message.Content, EmailPriority.Normal);
         var result = await emailService.SendAsync(email, cancellationToken);
-        return Results.Ok(new { emailSent = result.Success, emailError = result.ErrorMessage });
+        return Results.Ok(new { saved = true, emailSent = result.Success, emailError = result.ErrorMessage });
     }
 
-    dbContext.Messages.Add(message);
-    await dbContext.SaveChangesAsync(cancellationToken);
     return Results.Ok(new { saved = true });
 });
 

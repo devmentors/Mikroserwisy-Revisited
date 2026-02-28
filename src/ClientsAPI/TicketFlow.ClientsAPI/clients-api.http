@@ -1,15 +1,15 @@
 @host = http://localhost:5050
 
 ### =========================================
-### L03: Postel's Law - Forward Compatibility
+### L03: Postel's Law
 ### =========================================
 
-### FORWARD COMPATIBILITY - request z EXTRA polem
+### Request z EXTRA polem
 POST {{host}}/v2/inquiries
 Content-Type: application/json
 
 {
-  "title": "Test Forward Compatibility",
+  "title": "Test Postels Law",
   "description": "Testing Postels Law",
   "category": "Support",
   "name": "Jan Kowalski",

@@ -1,13 +1,28 @@
 @acl = http://localhost:6000
 @legacy = http://localhost:6050
 
-### Przez ACL - czysty JSON
-GET {{acl}}/demo/acl/invoice/12345
+### ===== L04: Anti-Corruption Layer =====
 
-### Przez ACL - losowe invoiceId (15% failure rate)
-GET {{acl}}/demo/acl/invoice/1234
+### Legacy SOAP (faulty)
+POST {{legacy}}/soap/billing/GetCustomerInvoices
+Content-Type: text/xml
 
-### Bezposrednio do Legacy SOAP (brzydki XML)
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <GetCustomerInvoicesRequest xmlns="http://legacy.billing.corp/2005">
+      <DOMAIN>example.com</DOMAIN>
+    </GetCustomerInvoicesRequest>
+  </soap:Body>
+</soap:Envelope>
+
+### ACL
+GET {{acl}}/customers/example.com/payment-standing
+
+### ACL - pojedyncza faktura
+GET {{acl}}/invoices/EX-2024-001
+
+### Legacy SOAP - pojedyncza faktura
 POST {{legacy}}/soap/billing/GetInvoice
 Content-Type: text/xml
 
@@ -15,13 +30,16 @@ Content-Type: text/xml
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
   <soap:Body>
     <GetInvoiceRequest xmlns="http://legacy.billing.corp/2005">
-      <INV_ID>12345</INV_ID>
+      <INV_ID>EX-2024-001</INV_ID>
     </GetInvoiceRequest>
   </soap:Body>
 </soap:Envelope>
 
-### Legacy - info endpoint
-GET {{legacy}}/
+### Seeded data: devmentors.io (VIP, in good standing)
+GET {{acl}}/customers/devmentors.io/payment-standing
+
+### Seeded data: ticketflow.com (Premium, ~35 dni overdue)
+GET {{acl}}/customers/ticketflow.com/payment-standing
 
 ### Legacy - health check
 GET {{legacy}}/soap/billing/health

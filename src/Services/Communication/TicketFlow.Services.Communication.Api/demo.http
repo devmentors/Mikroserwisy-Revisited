@@ -1,23 +1,131 @@
 @host = http://localhost:5600
 @mock = http://localhost:6150
 
-### Wyslij maila przez CommunicationService (-> MockSendGrid)
+### ===== Happy path =====
+
+### Reset stan
+POST {{mock}}/admin/reset
+
+### Wyslij wiadomosc — email powinien pojsc
 POST {{host}}/messages
 Content-Type: application/json
 
 {
   "recipentEmail": "klient@example.com",
-  "title": "Twoje zgloszenie zostalo przyjete",
-  "content": "Dziekujemy za kontakt. Numer sprawy: TKT-2024-001",
+  "title": "Twoje zgloszenie zostalo rozwiazane",
+  "content": "Ticket #1234 zostal rozwiazany. Dziekujemy za kontakt.",
   "timestamp": "2026-01-27T12:00:00Z",
   "isRead": false
 }
 
-### Mock admin - stats
+### Sprawdz stats — totalSent powinno byc 1
 GET {{mock}}/admin/stats
 
-### Mock admin - reset
+### ===== 401 fail fast =====
+
+### Invalidate token
+POST {{mock}}/admin/invalidate-token
+
+### Wyslij — dostanie ConfigurationError, brak retry w logach
+POST {{host}}/messages
+Content-Type: application/json
+
+{
+  "recipentEmail": "klient@example.com",
+  "title": "Test 401",
+  "content": "Ta wiadomosc uderzy w 401.",
+  "timestamp": "2026-01-27T12:01:00Z",
+  "isRead": false
+}
+
+### ===== 429 quota exceeded =====
+
+### Reset + ustaw quota na 2 (latwiej trafic)
 POST {{mock}}/admin/reset
 
-### Mock admin - invalidate token
+###
+POST {{mock}}/admin/set-quota?limit=2
+
+### Wyslij 1 — OK
+POST {{host}}/messages
+Content-Type: application/json
+
+{
+  "recipentEmail": "klient@example.com",
+  "title": "Flood 1",
+  "content": "Wiadomosc 1.",
+  "timestamp": "2026-01-27T12:02:00Z",
+  "isRead": false
+}
+
+### Wyslij 2 — OK
+POST {{host}}/messages
+Content-Type: application/json
+
+{
+  "recipentEmail": "klient@example.com",
+  "title": "Flood 2",
+  "content": "Wiadomosc 2.",
+  "timestamp": "2026-01-27T12:02:01Z",
+  "isRead": false
+}
+
+### Wyslij 3 — 429 -> logi z retry + Retry-After
+POST {{host}}/messages
+Content-Type: application/json
+
+{
+  "recipentEmail": "klient@example.com",
+  "title": "Flood 3",
+  "content": "Wiadomosc 3 — ta przekroczy limit.",
+  "timestamp": "2026-01-27T12:02:02Z",
+  "isRead": false
+}
+
+### ===== Inbox in DB =====
+
+### Wiadomosci w bazie
+GET {{host}}/anonymous-users/messages/?email=klient@example.com
+
+### Stats
+GET {{mock}}/admin/stats
+
+### ===== Chaos mode (losowe 401/503) =====
+
+### CHAOS ON — 10% random 401, 15% random 503
+POST {{mock}}/admin/enable-chaos
+
+### Wyslij kilka wiadomosci i obserwuj logi retry
+POST {{host}}/messages
+Content-Type: application/json
+
+{
+  "recipentEmail": "klient@example.com",
+  "title": "Chaos test",
+  "content": "Wiadomosc w trybie chaos.",
+  "timestamp": "2026-01-27T12:05:00Z",
+  "isRead": false
+}
+
+### Wylacz chaos
+POST {{mock}}/admin/disable-chaos
+
+### ===== Admin =====
+
+### Reset (czyści wszystko: quota, token, chaos)
+POST {{mock}}/admin/reset
+
+### Invalidate token
 POST {{mock}}/admin/invalidate-token
+
+### Set quota (np. limit=2)
+POST {{mock}}/admin/set-quota?limit=2
+
+### Enable chaos
+POST {{mock}}/admin/enable-chaos
+
+### Disable chaos
+POST {{mock}}/admin/disable-chaos
+
+### Stats
+GET {{mock}}/admin/stats

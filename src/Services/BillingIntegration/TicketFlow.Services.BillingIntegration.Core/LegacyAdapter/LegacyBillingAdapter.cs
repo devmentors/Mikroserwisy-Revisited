@@ -198,25 +198,25 @@ public sealed class LegacyBillingAdapter : IInvoiceRepository, IPaymentStandingR
         var invoiceElement = doc.Descendants(ns + "Invoice").FirstOrDefault()
             ?? throw new InvalidOperationException("Invoice element not found in SOAP response");
 
-        var lineItemsElement = invoiceElement.Element("LINE_ITEMS");
-        var lineItems = lineItemsElement?.Elements("ITEM")
+        var lineItemsElement = invoiceElement.Element(ns + "LINE_ITEMS");
+        var lineItems = lineItemsElement?.Elements(ns + "ITEM")
             .Select(item => new LegacyLineItemDto(
-                ITM_DESC: item.Element("ITM_DESC")?.Value ?? "",
-                QTY: item.Element("QTY")?.Value ?? "0",
-                PRC_UNIT: item.Element("PRC_UNIT")?.Value ?? "0",
-                AMT_LN: item.Element("AMT_LN")?.Value ?? "0"
+                ITM_DESC: item.Element(ns + "ITM_DESC")?.Value ?? "",
+                QTY: item.Element(ns + "QTY")?.Value ?? "0",
+                PRC_UNIT: item.Element(ns + "PRC_UNIT")?.Value ?? "0",
+                AMT_LN: item.Element(ns + "AMT_LN")?.Value ?? "0"
             )).ToList() ?? new List<LegacyLineItemDto>();
 
         return new LegacySoapInvoiceDto(
-            INV_ID: invoiceElement.Element("INV_ID")?.Value ?? "",
-            CUST_REF: invoiceElement.Element("CUST_REF")?.Value ?? "",
-            INV_NUM: invoiceElement.Element("INV_NUM")?.Value ?? "",
-            AMT_TOT: invoiceElement.Element("AMT_TOT")?.Value ?? "0",
-            AMT_CURR: invoiceElement.Element("AMT_CURR")?.Value ?? "USD",
-            STS_CD: invoiceElement.Element("STS_CD")?.Value ?? "",
-            DT_ISS: invoiceElement.Element("DT_ISS")?.Value ?? "",
-            DT_DUE: invoiceElement.Element("DT_DUE")?.Value ?? "",
-            DT_PD: invoiceElement.Element("DT_PD")?.Value ?? "",
+            INV_ID: invoiceElement.Element(ns + "INV_ID")?.Value ?? "",
+            CUST_REF: invoiceElement.Element(ns + "CUST_REF")?.Value ?? "",
+            INV_NUM: invoiceElement.Element(ns + "INV_NUM")?.Value ?? "",
+            AMT_TOT: invoiceElement.Element(ns + "AMT_TOT")?.Value ?? "0",
+            AMT_CURR: invoiceElement.Element(ns + "AMT_CURR")?.Value ?? "USD",
+            STS_CD: invoiceElement.Element(ns + "STS_CD")?.Value ?? "",
+            DT_ISS: invoiceElement.Element(ns + "DT_ISS")?.Value ?? "",
+            DT_DUE: invoiceElement.Element(ns + "DT_DUE")?.Value ?? "",
+            DT_PD: invoiceElement.Element(ns + "DT_PD")?.Value ?? "",
             LINE_ITEMS: lineItems
         );
     }
