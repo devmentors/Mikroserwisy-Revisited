@@ -24,7 +24,7 @@ public static class Extensions
         services
             .AddExceptions()
             .AddApp(configuration)
-            .AddSerialization()
+            .AddSerialization(configuration)
             .AddMessaging(configuration, x => x
                 .UseRabbitMq()
                 .UseMessageConsumerConvention<DontUseConventionalTopology>()

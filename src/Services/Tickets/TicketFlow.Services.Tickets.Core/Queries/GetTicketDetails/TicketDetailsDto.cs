@@ -10,4 +10,5 @@ public record TicketDetailsDto(
     SeverityLevel? SeverityLevel,
     Guid? AssignedAgentUserId,
     string? Type,
-    string? Resolution = default);
+    string? Resolution = default,
+    string? LanguageCode = default);

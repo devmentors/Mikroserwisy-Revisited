@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\TicketFlow.Shared\TicketFlow.Shared.csproj" />
       <ProjectReference Include="..\..\SystemMetrics\TicketFlow.Services.SystemMetrics.Generator\TicketFlow.Services.SystemMetrics.Generator.csproj" />
       <ProjectReference Include="..\TicketFlow.Services.Communication.Alerting\TicketFlow.Services.Communication.Alerting.csproj" />

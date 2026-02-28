@@ -1,0 +1,32 @@
+@mock = http://localhost:6150
+
+### Admin - stats
+GET {{mock}}/admin/stats
+
+### Admin - reset
+POST {{mock}}/admin/reset
+
+### Admin - invalidate token (wymusza 401)
+POST {{mock}}/admin/invalidate-token
+
+### Wyslij maila (success)
+POST {{mock}}/v3/mail/send
+Content-Type: application/json
+
+{
+  "personalizations": [{ "to": [{ "email": "test@example.com" }] }],
+  "from": { "email": "noreply@ticketflow.com" },
+  "subject": "Test",
+  "content": [{ "type": "text/plain", "value": "Hello" }]
+}
+
+### Wyslij maila (bad email -> 400)
+POST {{mock}}/v3/mail/send
+Content-Type: application/json
+
+{
+  "personalizations": [{ "to": [{ "email": "invalid" }] }],
+  "from": { "email": "noreply@ticketflow.com" },
+  "subject": "Test",
+  "content": [{ "type": "text/plain", "value": "Hello" }]
+}

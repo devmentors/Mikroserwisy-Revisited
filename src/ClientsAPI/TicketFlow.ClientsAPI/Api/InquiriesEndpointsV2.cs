@@ -10,7 +10,7 @@ public static class InquiriesEndpointsV2
     public static IEndpointRouteBuilder MapInquiriesV2(this IEndpointRouteBuilder app)
     {
         var v2 = app.NewVersionedApi()
-            .MapGroup("/v2/inquiries")
+            .MapGroup("/v{version:apiVersion}/inquiries")
             .HasApiVersion(2, 0);
 
         v2.MapPost("/", SubmitInquiry)
@@ -73,14 +73,18 @@ public static class InquiriesEndpointsV2
     }
 
     private static async Task<IResult> ListInquiries(
-        [FromQuery] string email,
+        [FromQuery] string? email,
         [FromQuery] int? page,
         [FromQuery] int? limit,
         IInquiriesClient client,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(email))
-            return Results.BadRequest("Email parameter is required");
+            return Results.Problem(
+                detail: "The 'email' query parameter is required to list inquiries.",
+                title: "Missing required parameter",
+                statusCode: StatusCodes.Status400BadRequest,
+                type: "https://tools.ietf.org/html/rfc9110#section-15.5.1");
 
         var result = await client.GetByEmailAsync(email, limit ?? 100, cancellationToken);
 

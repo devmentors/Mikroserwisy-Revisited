@@ -13,7 +13,7 @@ const API_URLS: Record<ApiMode, {
     systemMetrics: 'http://localhost:5900',
   },
   gateway: {
-    inquiries: 'http://localhost:5100',
+    inquiries: 'http://localhost:5050',  // ClientsAPI - public API for external clients
     tickets: 'http://localhost:5100',
     communication: 'http://localhost:5100',
     systemMetrics: 'http://localhost:5100',

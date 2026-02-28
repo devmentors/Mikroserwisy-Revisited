@@ -26,7 +26,7 @@ public static class Extensions
         services
             .AddExceptions()
             .AddApp(configuration)
-            .AddSerialization()
+            .AddSerialization(configuration)
             .AddCommands()
             .AddQueries()
             .AddMessaging(configuration, x => x

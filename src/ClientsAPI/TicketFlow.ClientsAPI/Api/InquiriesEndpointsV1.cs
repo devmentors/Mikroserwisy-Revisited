@@ -10,7 +10,7 @@ public static class InquiriesEndpointsV1
     public static IEndpointRouteBuilder MapInquiriesV1(this IEndpointRouteBuilder app)
     {
         var v1 = app.NewVersionedApi()
-            .MapGroup("/v1/inquiries")
+            .MapGroup("/v{version:apiVersion}/inquiries")
             .HasApiVersion(1, 0)
             .AddEndpointFilter(async (context, next) =>
             {

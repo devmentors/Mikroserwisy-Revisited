@@ -9,6 +9,7 @@ using TicketFlow.Services.Tickets.Core.Messaging;
 using TicketFlow.Services.Tickets.Core.Messaging.Publishing.Conventions;
 using TicketFlow.Shared.AnomalyGeneration;
 using TicketFlow.Shared.App;
+using TicketFlow.Shared.Caching;
 using TicketFlow.Shared.Commands;
 using TicketFlow.Shared.Data;
 using TicketFlow.Shared.Exceptions;
@@ -22,6 +23,7 @@ using TicketFlow.Shared.Metrics;
 using TicketFlow.Shared.Observability;
 using TicketFlow.Shared.Queries;
 using TicketFlow.Shared.Serialization;
+using TicketFlow.Services.Tickets.Core.Serialization;
 
 namespace TicketFlow.Services.Tickets.Core;
 
@@ -32,7 +34,7 @@ public static class Extensions
         services
             .AddExceptions()
             .AddApp(configuration)
-            .AddSerialization()
+            .AddTicketsSerialization(configuration)
             .AddAppInitializers()
             .AddCommands()
             .AddQueries()
@@ -46,6 +48,7 @@ public static class Extensions
                 .UseAnomalies()
                 .UseResiliency())
             .AddPostgres<TicketsDbContext>(configuration)
+            .AddCachingWithFallback(configuration)
             .AddSystemMetrics(configuration)
             .AddMetrics(configuration)
             .AddObservability(configuration);
@@ -59,6 +62,24 @@ public static class Extensions
         {
             client.BaseAddress = new Uri(vaultUrl);
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddTicketsSerialization(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var usePascalCase = configuration.GetValue<bool>("Serialization:UsePascalCase");
+
+        if (usePascalCase)
+        {
+            services.AddSingleton<ISerializer, PascalCaseJsonSerializer>();
+        }
+        else
+        {
+            services.AddSerialization(configuration);
+        }
 
         return services;
     }

@@ -1,0 +1,8 @@
+@bff = http://localhost:5200
+@gateway = http://localhost:5100
+
+### Surowe dane
+GET {{gateway}}/tickets
+
+### Viewmodel wylacznie pod FE
+GET {{bff}}/manager/dashboard

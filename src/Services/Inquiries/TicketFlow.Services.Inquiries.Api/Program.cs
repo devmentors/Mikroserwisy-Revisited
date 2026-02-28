@@ -4,6 +4,7 @@ using TicketFlow.Services.Inquiries.Core;
 using TicketFlow.Services.Inquiries.Core.Commands.SubmitInquiry;
 using TicketFlow.Services.Inquiries.Core.Commands.SubmitInquirySynchronously;
 using TicketFlow.Services.Inquiries.Core.Queries;
+using TicketFlow.Services.Inquiries.Core.Statistics;
 using TicketFlow.Shared.AnomalyGeneration.HttpApi;
 using TicketFlow.Shared.Metrics;
 using TicketFlow.Shared.AspNetCore;
@@ -25,11 +26,16 @@ app.MapGet("/instance", () => new { Service = "Inquiries", Instance = Environmen
 
 app.MapGet("/test-error", () => Results.StatusCode(500));
 
+app.MapGet("/inquiries/statistics", async (
+    [FromServices] IInquiryStatisticsService statisticsService,
+    CancellationToken cancellationToken)
+    => Results.Ok(await statisticsService.GetStatisticsAsync(cancellationToken)));
+
 app.MapGet("/inquiries", async (
     [FromQuery] int page,
     [FromQuery] int limit,
     [FromServices] IQueryHandler<ListInquiries, InquiriesListDto> handler,
-    CancellationToken cancellationToken) 
+    CancellationToken cancellationToken)
     => Results.Ok((object?)await handler.HandleAsync(new(page, limit), cancellationToken)));
 
 app.MapPost("/inquiries/submit", async (

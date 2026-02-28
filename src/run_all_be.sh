@@ -8,6 +8,23 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+SERVICE_PIDS=()
+
+cleanup() {
+    echo ""
+    echo -e "  ${YELLOW}Stopping all services...${NC}"
+    for pid in "${SERVICE_PIDS[@]}"; do
+        kill "$pid" 2>/dev/null
+    done
+    pkill -f "TicketFlow" 2>/dev/null
+    sleep 1
+    pkill -9 -f "TicketFlow" 2>/dev/null
+    echo -e "  ${GREEN}✓${NC} All services stopped"
+    exit 0
+}
+
+trap cleanup SIGINT SIGTERM
+
 # Clear screen for clean output
 clear
 
@@ -50,19 +67,37 @@ printf "  ${YELLOW}◉${NC} Starting services..."
 
 # Start API Gateway
 (cd ApiGateway/TicketFlow.ApiGateway && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
 
 # Start BFF
 (cd BFF/TicketFlow.BFF && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
 
 # Start ClientsAPI (External Edge Layer)
 (cd ClientsAPI/TicketFlow.ClientsAPI && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
 
 # Start all services
 for dir in Services/*/*.Api/; do
     if [ -d "$dir" ]; then
         (cd "$dir" && dotnet run --no-build > /dev/null 2>&1) &
+        SERVICE_PIDS+=($!)
     fi
 done
+
+# Start External Systems (Legacy systems for demo purposes)
+for dir in ExternalSystems/*/; do
+    if [ -d "$dir" ] && [ -f "$dir"/*.csproj ]; then
+        (cd "$dir" && dotnet run --no-build > /dev/null 2>&1) &
+        SERVICE_PIDS+=($!)
+    fi
+done
+
+# Start MockSendGrid (nested folder structure)
+if [ -d "ExternalSystems/MockSendGrid/MockSendGrid" ]; then
+    (cd ExternalSystems/MockSendGrid/MockSendGrid && dotnet run --no-build > /dev/null 2>&1) &
+    SERVICE_PIDS+=($!)
+fi
 
 # Wait for services to start
 sleep 8
@@ -87,6 +122,12 @@ echo -e "${GREEN}║${NC}  Translations             ${CYAN}http://localhost:5800
 echo -e "${GREEN}║${NC}  SystemMetrics            ${CYAN}http://localhost:5900${NC}          ${GREEN}║${NC}"
 echo -e "${GREEN}║${NC}  PersonalInfoVault        ${CYAN}http://localhost:6100${NC}          ${GREEN}║${NC}"
 echo -e "${GREEN}║${NC}  Anonymization            ${CYAN}http://localhost:6200${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}╠═══════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║${NC}  ${YELLOW}DEMO/EXTERNAL SYSTEMS${NC}                                    ${GREEN}║${NC}"
+echo -e "${GREEN}╠═══════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║${NC}  BillingIntegration (ACL) ${CYAN}http://localhost:6000${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  LegacyBillingSystem      ${CYAN}http://localhost:6050${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  MockSendGrid             ${CYAN}http://localhost:6150${NC}          ${GREEN}║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${YELLOW}TIP:${NC} Press ${RED}Ctrl+C${NC} to stop all services"

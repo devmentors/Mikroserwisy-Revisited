@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-hog
+  labels:
+    app: memory-hog
+    demo: isolation
+spec:
+  # PriorityClass z niskim priorytetem - OOMKiller wybierze INNE pody pierwsze
+  priorityClassName: system-node-critical
+  containers:
+    - name: hog
+      image: python:3-alpine
+      command:
+        - python
+        - -c
+        - |
+          import time
+          print("Starting memory hog...")
+          data = []
+          i = 0
+          while True:
+              data.append(bytearray(100 * 1024 * 1024))
+              i += 1
+              print(f"Allocated {i * 100}MB", flush=True)
+              time.sleep(0.3)

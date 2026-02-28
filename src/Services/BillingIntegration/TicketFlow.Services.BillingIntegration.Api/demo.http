@@ -1,0 +1,27 @@
+@acl = http://localhost:6000
+@legacy = http://localhost:6050
+
+### Przez ACL - czysty JSON
+GET {{acl}}/demo/acl/invoice/12345
+
+### Przez ACL - losowe invoiceId (15% failure rate)
+GET {{acl}}/demo/acl/invoice/1234
+
+### Bezposrednio do Legacy SOAP (brzydki XML)
+POST {{legacy}}/soap/billing/GetInvoice
+Content-Type: text/xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <GetInvoiceRequest xmlns="http://legacy.billing.corp/2005">
+      <INV_ID>12345</INV_ID>
+    </GetInvoiceRequest>
+  </soap:Body>
+</soap:Envelope>
+
+### Legacy - info endpoint
+GET {{legacy}}/
+
+### Legacy - health check
+GET {{legacy}}/soap/billing/health

@@ -26,6 +26,17 @@ services:
       - 5432:5432
     volumes:
       - postgres:/var/lib/postgresql
+  redis:
+    image: redis:7-alpine
+    container_name: 'ticketflow-redis'
+    restart: unless-stopped
+    networks:
+      - TicketFlow
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data
+    command: redis-server --appendonly yes
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: jaeger
@@ -87,6 +98,8 @@ volumes:
   rabbitmq:
     driver: local
   postgres:
+    driver: local
+  redis:
     driver: local
   prometheus:
     driver: local
