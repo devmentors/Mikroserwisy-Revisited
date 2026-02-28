@@ -45,7 +45,6 @@ public class AgentAssignedHandler(
             logger.LogWarning(ex, "Failed to fetch agent info for ticket {TicketId}", message.TicketId);
         }
 
-        projection.Status = "Assigned";
         projection.Version = message.Version;
         await repository.UpdateAsync(projection, cancellationToken);
         logger.LogInformation("Agent assigned to ticket {TicketId}", message.TicketId);

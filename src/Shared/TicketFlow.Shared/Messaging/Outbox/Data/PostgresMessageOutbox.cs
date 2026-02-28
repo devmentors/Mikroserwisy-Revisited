@@ -32,7 +32,7 @@ internal sealed class PostgresMessageOutbox(OutboxDbContext dbContext, OutboxLoc
 
     public async Task<IReadOnlyList<OutboxMessage>> GetUnsentAsync(int batchSize = default, CancellationToken cancellationToken = default)
     {
-        var sqlQuery = $"SELECT * FROM outbox.\"OutboxMessages\" WHERE \"ProcessedAt\" IS NULL ORDER BY \"StoredAt\" DESC {(batchSize > 0? $"LIMIT {batchSize}" : "")} FOR UPDATE SKIP LOCKED";
+        var sqlQuery = $"SELECT * FROM outbox.\"OutboxMessages\" WHERE \"ProcessedAt\" IS NULL ORDER BY \"StoredAt\" {(batchSize > 0? $"LIMIT {batchSize}" : "")} FOR UPDATE SKIP LOCKED";
         
         return await dbContext.OutboxMessages
             .FromSqlRaw(sqlQuery)
