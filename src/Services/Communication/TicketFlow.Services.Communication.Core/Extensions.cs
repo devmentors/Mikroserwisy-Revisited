@@ -1,8 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TicketFlow.Services.Communication.Core.Data;
+using TicketFlow.Services.Communication.Core.ExternalServices.Email;
+using TicketFlow.Services.Communication.Core.Http.Agents;
 using TicketFlow.Services.Communication.Core.Http.Tickets;
+using TicketFlow.Services.Communication.Core.Messages;
 using TicketFlow.Services.Communication.Core.Messaging;
+using TicketFlow.Services.Communication.Core.Translations;
 using TicketFlow.Services.SystemMetrics.Generator;
 using TicketFlow.Shared.AnomalyGeneration;
 using TicketFlow.Shared.App;
@@ -18,6 +22,7 @@ using TicketFlow.Shared.Messaging.Topology;
 using TicketFlow.Shared.Metrics;
 using TicketFlow.Shared.Observability;
 using TicketFlow.Shared.Queries;
+using TicketFlow.Shared.Caching;
 using TicketFlow.Shared.Serialization;
 
 namespace TicketFlow.Services.Communication.Core;
@@ -28,7 +33,7 @@ public static class Extensions
     {
         services
             .AddExceptions()
-            .AddSerialization()
+            .AddSerialization(configuration)
             .AddApp(configuration)
             .AddCommands()
             .AddQueries()
@@ -41,6 +46,9 @@ public static class Extensions
                 .UseAnomalies()
                 .UseResiliency())
             .AddPostgres<CommunicationDbContext>(configuration)
+            .AddCachingWithFallback(configuration)
+            .AddLocalTranslations(configuration)
+            .AddScoped<IMessageService, MessageService>()
             .AddSystemMetrics(configuration)
             .AddMetrics(configuration)
             .AddObservability(configuration);
@@ -51,9 +59,17 @@ public static class Extensions
             builder.BaseAddress = new Uri(configuration.GetValue<string>("Services:Tickets"));
         });
 
+        services.AddHttpClient<IAgentClient, AgentClient>(builder =>
+        {
+            builder.BaseAddress = new Uri(configuration.GetValue<string>("Services:Tickets"));
+        });
+
+        var sendGridUrl = configuration.GetValue<string>("Services:SendGrid") ?? "http://localhost:6150";
+        services.AddEmailServiceWithCircuitBreaker(sendGridUrl);
+
         services.AddHostedService<CommunicationConsumer>();
         services.AddHostedService<CommunicationTopologyInitializer>();
-        
+
         return services;
     }
 }

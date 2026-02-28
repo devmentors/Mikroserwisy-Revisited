@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Asp.Versioning;
 using Scalar.AspNetCore;
 using TicketFlow.ClientsAPI;
@@ -7,6 +8,22 @@ using TicketFlow.Shared.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:21000")  // Inquiries frontend
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
+});
+
 builder.Services.AddMetrics(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 
@@ -15,7 +32,9 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
-    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new QueryStringApiVersionReader("api-version"));
 }).AddApiExplorer(options =>
 {
     options.GroupNameFormat = "'v'VVV";
@@ -54,6 +73,7 @@ builder.Services.AddHttpClient<IInquiriesClient, InquiriesClient>(client =>
 
 var app = builder.Build();
 
+app.UseCors();
 app.UseMetrics();
 app.MapOpenApi();
 app.MapScalarApiReference(options =>

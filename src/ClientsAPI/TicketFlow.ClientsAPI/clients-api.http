@@ -1,0 +1,61 @@
+@host = http://localhost:5050
+
+### =========================================
+### L03: Postel's Law - Forward Compatibility
+### =========================================
+
+### FORWARD COMPATIBILITY - request z EXTRA polem
+POST {{host}}/v2/inquiries
+Content-Type: application/json
+
+{
+  "title": "Test Forward Compatibility",
+  "description": "Testing Postels Law",
+  "category": "Support",
+  "name": "Jan Kowalski",
+  "email": "jan@example.com",
+  "futureField": "pole ktorego serwer nie zna - zignoruje"
+}
+
+
+### =========================================
+### L03: Hyrum's Law
+### =========================================
+### V1 brak email → framework exception (stack trace)
+### Oczekiwany response: 400 z BadHttpRequestException
+GET {{host}}/v1/inquiries
+
+###
+
+### V2 brak email → Problem Details (RFC 7807)
+GET {{host}}/v2/inquiries
+
+### -----------------------------------------
+### L03: V1 vs V2
+### -----------------------------------------
+
+### V1 lista - camelCase, "data" wrapper, string date
+GET {{host}}/v1/inquiries?email=jan@example.com
+
+###
+
+### V2 lista - camelCase, "items" wrapper, DateTimeOffset
+### Nowe pola: estimatedResponseTime, supportTier
+GET {{host}}/v2/inquiries?email=jan@example.com
+
+
+### -----------------------------------------
+### OpenAPI + Scalar UI
+### -----------------------------------------
+
+### OpenAPI V1 (wszystkie operacje deprecated)
+GET {{host}}/openapi/v1.json
+
+###
+
+### OpenAPI V2 (aktualna)
+GET {{host}}/openapi/v2.json
+
+### Scalar UI:
+### V1 (deprecated): http://localhost:5050/scalar/v1
+### V2 (current):    http://localhost:5050/scalar/v2

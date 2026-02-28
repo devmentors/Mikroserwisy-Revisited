@@ -6,9 +6,11 @@ using TicketFlow.Services.Inquiries.Core.Initializers;
 using TicketFlow.Services.Inquiries.Core.Http;
 using TicketFlow.Services.Inquiries.Core.LanguageDetection;
 using TicketFlow.Services.Inquiries.Core.Messaging;
+using TicketFlow.Services.Inquiries.Core.Statistics;
 using TicketFlow.Services.SystemMetrics.Generator;
 using TicketFlow.Shared.AnomalyGeneration;
 using TicketFlow.Shared.App;
+using TicketFlow.Shared.Caching;
 using TicketFlow.Shared.Commands;
 using TicketFlow.Shared.Data;
 using TicketFlow.Shared.Messaging;
@@ -30,10 +32,12 @@ public static class Extensions
     public static IServiceCollection AddCore(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IInquiriesRepository, InquiriesRepository>();
+        services.AddScoped<IInquiryStatisticsService, InquiryStatisticsService>();
 
         services
             .AddServiceClients(configuration)
-            .AddSerialization()
+            .AddSerialization(configuration)
+            .AddCachingWithFallback(configuration)
             .AddApp(configuration)
             .AddCommands()
             .AddQueries()

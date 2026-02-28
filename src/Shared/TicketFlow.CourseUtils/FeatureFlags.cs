@@ -8,4 +8,6 @@ public static class FeatureFlags
     public const bool UseListenToYourselfExample = false;
     public const bool UsePartitioningExample = false;
     public const bool ExtendPartitioningExample = false;
+    public const bool UseEmailNotifications = true;
+    public const bool UseRedisKeyPrefixes = false;
 }

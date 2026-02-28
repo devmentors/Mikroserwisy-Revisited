@@ -6,6 +6,21 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+cleanup() {
+    echo ""
+    echo -e "${YELLOW}Stopping all services...${NC}"
+    pkill -f "TicketFlow" 2>/dev/null
+    pkill -f "next-server" 2>/dev/null
+    pkill -f "next dev" 2>/dev/null
+    pkill -f "node.*mock" 2>/dev/null
+    sleep 1
+    pkill -9 -f "TicketFlow" 2>/dev/null
+    echo -e "${GREEN}All services stopped${NC}"
+    exit 0
+}
+
+trap cleanup SIGINT SIGTERM
+
 # Infra
 echo -e "${BLUE}Starting infrastructure...${NC}"
 sh ./run_infra.sh
@@ -51,6 +66,9 @@ printf "%-25s %s\n" "Communication" "http://localhost:5600"
 printf "%-25s %s\n" "SLA" "http://localhost:5700"
 printf "%-25s %s\n" "Translations" "http://localhost:5800"
 printf "%-25s %s\n" "SystemMetrics" "http://localhost:5900"
+printf "%-25s %s\n" "BillingIntegration (ACL)" "http://localhost:6000"
+printf "%-25s %s\n" "LegacyBillingSystem" "http://localhost:6050"
+printf "%-25s %s\n" "MockSendGrid" "http://localhost:6150"
 echo ""
 echo -e "${YELLOW}FRONTEND APPLICATIONS:${NC}"
 echo "-------------------------------------------------------"
@@ -63,8 +81,10 @@ echo -e "${YELLOW}INFRASTRUCTURE:${NC}"
 echo "-------------------------------------------------------"
 printf "%-25s %s\n" "RabbitMQ" "http://localhost:15672"
 printf "%-25s %s\n" "PostgreSQL" "localhost:5432"
+printf "%-25s %s\n" "Redis" "localhost:6379"
 printf "%-25s %s\n" "Prometheus" "http://localhost:9090"
 printf "%-25s %s\n" "Grafana" "http://localhost:3000"
+printf "%-25s %s\n" "Jaeger" "http://localhost:16686"
 echo "-------------------------------------------------------"
 echo ""
 echo "Press Ctrl+C to stop all services"

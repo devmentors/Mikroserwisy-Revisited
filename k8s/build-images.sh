@@ -20,19 +20,32 @@ docker build --no-cache -f k8s/docker/Dockerfile.personalinfovault -t ticketflow
 echo "Building apigateway..."
 docker build --no-cache -f k8s/docker/Dockerfile.apigateway -t ticketflow/apigateway:latest .
 
-echo "Removing old images from minikube..."
-minikube image rm docker.io/ticketflow/inquiries:latest 2>/dev/null || true
-minikube image rm docker.io/ticketflow/tickets:latest 2>/dev/null || true
-minikube image rm docker.io/ticketflow/translations:latest 2>/dev/null || true
-minikube image rm docker.io/ticketflow/personalinfovault:latest 2>/dev/null || true
-minikube image rm docker.io/ticketflow/apigateway:latest 2>/dev/null || true
+echo ""
+echo "✓ Docker images built successfully!"
+echo ""
 
-echo "Loading images into minikube..."
-minikube image load ticketflow/inquiries:latest
-minikube image load ticketflow/tickets:latest
-minikube image load ticketflow/translations:latest
-minikube image load ticketflow/personalinfovault:latest
-minikube image load ticketflow/apigateway:latest
+# Sprawdź czy minikube działa - jeśli tak, załaduj obrazy
+if minikube status > /dev/null 2>&1; then
+    echo "Minikube detected. Loading images into minikube..."
 
-echo "Done! Images in minikube:"
-minikube image ls | grep ticketflow
+    echo "Removing old images from minikube..."
+    minikube image rm docker.io/ticketflow/inquiries:latest 2>/dev/null || true
+    minikube image rm docker.io/ticketflow/tickets:latest 2>/dev/null || true
+    minikube image rm docker.io/ticketflow/translations:latest 2>/dev/null || true
+    minikube image rm docker.io/ticketflow/personalinfovault:latest 2>/dev/null || true
+    minikube image rm docker.io/ticketflow/apigateway:latest 2>/dev/null || true
+
+    echo "Loading images into minikube..."
+    minikube image load ticketflow/inquiries:latest
+    minikube image load ticketflow/tickets:latest
+    minikube image load ticketflow/translations:latest
+    minikube image load ticketflow/personalinfovault:latest
+    minikube image load ticketflow/apigateway:latest
+
+    echo ""
+    echo "✓ Images loaded into minikube:"
+    minikube image ls | grep ticketflow
+else
+    echo "Minikube not running - skipping image load."
+    echo "Images will be loaded when you run the demo script."
+fi

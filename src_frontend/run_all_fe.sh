@@ -4,6 +4,18 @@
 API_MODE=${1:-gateway}
 export NEXT_PUBLIC_API_MODE=$API_MODE
 
+cleanup() {
+    echo ""
+    echo "Stopping all frontend services..."
+    pkill -f "next-server" 2>/dev/null
+    pkill -f "next dev" 2>/dev/null
+    rm -f check_port.js kill_port.js 2>/dev/null
+    echo "All frontend services stopped"
+    exit 0
+}
+
+trap cleanup SIGINT SIGTERM
+
 echo "============================================"
 echo "Starting frontend apps in '$API_MODE' mode"
 echo "============================================"

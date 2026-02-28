@@ -24,7 +24,7 @@ public static class Extensions
     {
         services
             .AddExceptions()
-            .AddSerialization()
+            .AddSerialization(configuration)
             .AddApp(configuration)
             .AddCommands()
             .AddQueries()
@@ -38,7 +38,7 @@ public static class Extensions
             .AddSystemMetrics(configuration)
             .AddMetrics(configuration)
             .AddObservability(configuration);
-        
+
         services.AddHostedService<TranslationsConsumerService>();
         services.AddHostedService<TranslationTopologyInitializer>();
         return services;

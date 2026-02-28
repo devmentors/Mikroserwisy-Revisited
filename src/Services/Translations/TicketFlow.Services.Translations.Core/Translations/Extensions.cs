@@ -11,14 +11,29 @@ internal static class Extensions
     public static IServiceCollection AddTranslations(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOpenAi(configuration);
+
+        services.AddSingleton<ElevenLabsTranslationsService>();
+        services.AddSingleton(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<OpenAIOptions>>();
+            return options.Value.Enabled
+                ? new OpenAiTranslationsService(sp.GetRequiredService<IChatClient>())
+                : new OpenAiTranslationsService(null!);
+        });
+
         services.AddSingleton<ITranslationsService>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<OpenAIOptions>>();
+            if (!options.Value.Enabled)
+            {
+                return new NoopTranslationsService();
+            }
 
-            return options.Value.Enabled
-                ? new OpenAiTranslationsService(sp.GetRequiredService<IChatClient>())
-                : new NoopTranslationsService();
+            return new SmartTranslationsService(
+                sp.GetRequiredService<ElevenLabsTranslationsService>(),
+                sp.GetRequiredService<OpenAiTranslationsService>());
         });
+
         return services;
     }
 }

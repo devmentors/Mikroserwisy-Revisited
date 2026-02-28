@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tickets-service
+spec:
+  selector:
+    app: tickets
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickets
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tickets
+  template:
+    metadata:
+      labels:
+        app: tickets
+    spec:
+      containers:
+        - name: tickets
+          image: ticketflow/tickets:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: Postgres__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: tickets-connection-string
+            - name: rabbitMq__hostName
+              value: "rabbitmq-service"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "250m"
+            limits:
+              memory: "1.5Gi"
+              cpu: "500m"

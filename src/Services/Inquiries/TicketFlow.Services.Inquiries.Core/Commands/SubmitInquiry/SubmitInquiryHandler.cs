@@ -33,7 +33,9 @@ internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILan
                 inquiry.Description,
                 inquiry.Category.ToString(),
                 languageCode,
-                inquiry.CreatedAt);
+                inquiry.CreatedAt,
+                SubmittedVia: "web",
+                ClientIpHash: "hash_placeholder");
             await messagePublisher.PublishAsync(inquiryReportedMessage, cancellationToken: cancellationToken);
         }
         else
@@ -45,7 +47,9 @@ internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILan
                 inquiry.Description,
                 inquiry.Category.ToString(),
                 languageCode,
-                inquiry.CreatedAt);
+                inquiry.CreatedAt,
+                SubmittedVia: "web",
+                ClientIpHash: "hash_placeholder");
             await messagePublisher.PublishAsync(inquiryReportedMessage, cancellationToken: cancellationToken);
         }
         

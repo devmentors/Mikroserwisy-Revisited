@@ -5,4 +5,5 @@ public record TicketDto(
     string Email,
     string Status,
     Guid? AssignedAgentUserId,
-    string? Resolution);
+    string? Resolution,
+    string? LanguageCode);
