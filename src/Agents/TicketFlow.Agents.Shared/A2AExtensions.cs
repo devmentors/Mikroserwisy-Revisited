@@ -14,6 +14,12 @@ public static class A2AExtensions
             client.Timeout = TimeSpan.FromMinutes(3);
         });
 
+        services.AddTransient<A2AContextPropagationHandler>();
+        services.AddHttpClient<SdkA2AToolsBuilder>(client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(3);
+        }).AddHttpMessageHandler<A2AContextPropagationHandler>();
+
         return services;
     }
 }

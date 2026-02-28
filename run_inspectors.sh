@@ -169,8 +169,8 @@ launch_a2a_inspector() {
 
     echo ""
     print_info "A2A Card endpoints:"
-    print_info "  - Escalation: http://localhost:8104/a2a/card"
-    print_info "  - KB Agent:   http://localhost:8106/a2a/card"
+    print_info "  - Escalation: http://localhost:8104/.well-known/agent-card.json"
+    print_info "  - KB Agent:   http://localhost:8106/.well-known/agent-card.json"
     echo ""
 
     # Clone if needed
@@ -308,8 +308,8 @@ print_summary() {
     echo "  Inquiries MCP: http://localhost:5501/mcp/card"
     echo ""
     echo -e "${CYAN}A2A Agent Cards:${NC}"
-    echo "  Escalation:    http://localhost:8104/a2a/card"
-    echo "  KB Agent:      http://localhost:8106/a2a/card"
+    echo "  Escalation:    http://localhost:8104/.well-known/agent-card.json"
+    echo "  KB Agent:      http://localhost:8106/.well-known/agent-card.json"
     echo ""
     echo -e "${YELLOW}Note: Make sure MCP servers and A2A agents are running!${NC}"
     echo -e "${YELLOW}Run ./run_ticketflow.sh first, then use these inspectors.${NC}"
@@ -328,8 +328,12 @@ main() {
             wait
             ;;
         a2a)
+            trap stop_inspectors EXIT INT TERM
             launch_a2a_inspector
             print_summary
+            echo ""
+            print_info "Press Ctrl+C to stop"
+            wait
             ;;
         stop)
             stop_inspectors

@@ -2,7 +2,6 @@ namespace TicketFlow.Agents.Escalation.Configuration;
 
 public class EscalationOptions
 {
-    // MCP Servers configuration (like ChatBot)
     public Dictionary<string, string> McpServers { get; set; } = new()
     {
         ["TicketsMcp"] = "http://localhost:5401"

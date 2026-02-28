@@ -31,6 +31,23 @@ public sealed partial class LlmReflectionService : ILlmReflectionService
         _logger = logger;
     }
 
+    // Przyklad refleksji:
+    //Input:
+    //  Failed step: apply_qualification - {"success":false,"error":"Failed to apply qualification. Ticket may already be qualified or resolved."}
+    //Output:
+    /*
+        {
+           Analysis: "Niepowodzenie wynika z faktu, że zgłoszenie mogło być już zakwalifikowane lub rozwiązane, co uniemożliwia ponowne zastosowanie kwalifikacji. Może to sugerować problem z logiką przypisywania stanów zgłoszenia."
+           AlternativeStrategies: [
+               0: "Zweryfikuj stan zgłoszenia przed próbą kwalifikacji"
+               1: "Zaimplementuj mechanizm sprawdzania, czy zgłoszenie jest już zakwalifikowane lub rozwiązane przed próbą kwalifikacji"
+           ]
+           ShouldReplan: true
+           ShouldEscalateToSupervisor: false
+           SuggestedNextAction: "Zaktualizuj plan, aby dodać kroki weryfikacji stanu zgłoszenia przed próbą jego kwalifikacji."
+           Confidence: 0.7
+       }
+     */
     public async Task<ReflectionResult> ReflectOnFailureAsync(
         AgentStep failedStep,
         AgentPlan plan,

@@ -1,9 +1,7 @@
 using A2A;
 using Microsoft.Extensions.Options;
 using TicketFlow.Agents.Escalation.Configuration;
-using TicketFlow.Agents.Escalation.Models;
 using TicketFlow.Agents.Escalation.Services;
-using TicketFlow.Agents.Shared.Models;
 
 namespace TicketFlow.Agents.Escalation.Agents;
 
@@ -13,6 +11,7 @@ public class EscalationConversationAgent
     private readonly IEscalationToolsLoader _toolsLoader;
     private readonly EscalationOptions _options;
     private readonly ILogger<EscalationConversationAgent> _logger;
+    private ITaskManager _taskManager = null!;
 
     public EscalationConversationAgent(
         IAutonomousAgentRunner agentRunner,
@@ -28,7 +27,13 @@ public class EscalationConversationAgent
 
     public void Attach(ITaskManager taskManager)
     {
-        taskManager.OnMessageReceived = async (msg, ct) => await ProcessMessageAsync(msg, ct);
+        _taskManager = taskManager;
+
+        // No OnMessageReceived — the library auto-creates a task and routes to OnTaskCreated.
+        // This enables streaming: the library sets up SSE before calling OnTaskCreated,
+        // so UpdateStatusAsync calls inside the handler push events to the stream.
+
+        taskManager.OnTaskCreated = async (task, ct) => await ProcessTaskAsync(task, ct);
 
         taskManager.OnAgentCardQuery = (agentUrl, ct) => Task.FromResult(new A2A.AgentCard
         {
@@ -38,7 +43,7 @@ public class EscalationConversationAgent
             Version = "3.0.0",
             Capabilities = new A2A.AgentCapabilities
             {
-                Streaming = false,
+                Streaming = true,
                 PushNotifications = false
             },
             Skills =
@@ -61,45 +66,60 @@ public class EscalationConversationAgent
         });
     }
 
-    private async Task<AgentMessage> ProcessMessageAsync(MessageSendParams messageSendParams, CancellationToken ct)
+    private async Task ProcessTaskAsync(AgentTask task, CancellationToken ct)
     {
         try
         {
-            var message = messageSendParams.Message;
-            string? inputText = null;
-
-            if (message.Parts != null)
-            {
-                foreach (var part in message.Parts)
-                {
-                    if (part is TextPart textPart && !string.IsNullOrEmpty(textPart.Text))
-                    {
-                        inputText = textPart.Text;
-                        break;
-                    }
-                }
-            }
+            var inputText = task.History?.LastOrDefault(m => m.Role == MessageRole.User) is { } lastUserMsg
+                ? ExtractTextFromMessage(lastUserMsg)
+                : null;
 
             if (string.IsNullOrEmpty(inputText))
             {
-                return CreateTextResponse("Nie otrzymałem żadnej wiadomości. Proszę spróbować ponownie.");
+                await _taskManager.UpdateStatusAsync(task.Id, TaskState.Failed,
+                    message: CreateTextResponse("Nie otrzymałem żadnej wiadomości."), final: true, cancellationToken: ct);
+                return;
             }
-            
-            var userContext = UseAgentUserCtx();
-            var response = await HandleConversationAsync(inputText, userContext, ct);
-            return CreateTextResponse(response);
+
+            await _taskManager.UpdateStatusAsync(task.Id, TaskState.Working,
+                message: CreateTextResponse("Starting escalation..."), final: false, cancellationToken: ct);
+
+            var response = await HandleConversationAsync(inputText, ct, onStepProgress: async stepText =>
+            {
+                await _taskManager.UpdateStatusAsync(task.Id, TaskState.Working,
+                    message: CreateTextResponse(stepText), final: false, cancellationToken: ct);
+            });
+
+            await _taskManager.UpdateStatusAsync(task.Id, TaskState.Completed,
+                message: CreateTextResponse(response), final: true, cancellationToken: ct);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error processing A2A message");
-            return CreateTextResponse($"Wystąpił błąd: {ex.Message}. Proszę spróbować ponownie.");
+            _logger.LogError(ex, "Error processing A2A streaming task {TaskId}", task.Id);
+            await _taskManager.UpdateStatusAsync(task.Id, TaskState.Failed,
+                message: CreateTextResponse($"Wystąpił błąd: {ex.Message}"), final: true, cancellationToken: ct);
         }
     }
-    
+
+    private static string? ExtractTextFromMessage(AgentMessage message)
+    {
+        if (message.Parts == null) return null;
+
+        foreach (var part in message.Parts)
+        {
+            if (part is TextPart textPart && !string.IsNullOrEmpty(textPart.Text))
+            {
+                return textPart.Text;
+            }
+        }
+
+        return null;
+    }
+
     private async Task<string> HandleConversationAsync(
         string userMessage,
-        UserContext userContext,
-        CancellationToken ct)
+        CancellationToken ct,
+        Func<string, Task>? onStepProgress = null)
     {
         var ticketId = ExtractTicketId(userMessage);
         if (ticketId == null)
@@ -110,12 +130,13 @@ public class EscalationConversationAgent
         try
         {
             var tools = await _toolsLoader.LoadToolsAsync(ct);
-            
+
             var result = await _agentRunner.RunAsync(
                 goal: userMessage,
                 tools: tools.ToArray(),
                 maxSteps: _options.MaxSteps,
-                ct: ct);
+                ct: ct,
+                onStepProgress: onStepProgress);
 
             return result.FinalMessage;
         }
@@ -124,15 +145,6 @@ public class EscalationConversationAgent
             _logger.LogError(ex, "Error in autonomous agent execution");
             return $"Wystąpił błąd podczas przetwarzania żądania: {ex.Message}";
         }
-    }
-
-    private UserContext UseAgentUserCtx()
-    {
-        return new UserContext
-        {
-            Role = "escalation_agent",
-            Email = "escalation@ticketflow.local"
-        };
     }
 
     private Guid? ExtractTicketId(string message)

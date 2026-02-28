@@ -9,6 +9,7 @@ public static class FeatureFlags
     public const bool UsePartitioningExample = false;
     public const bool ExtendPartitioningExample = false;
 
-    public const bool UseAgentWithoutTools = false;
+    public const bool UseAgentWithoutTools = false; 
     public const bool UseDirectHttpInsteadOfMcp = false;
+    public const bool DisableA2AStreaming = true;
 }

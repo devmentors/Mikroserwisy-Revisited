@@ -40,7 +40,8 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
         string goal,
         AITool[] tools,
         int maxSteps = 10,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        Func<string, Task>? onStepProgress = null)
     {
         using var runActivity = ActivitySource.StartActivity("autonomous-agent-run");
         SetActivityTags();
@@ -50,7 +51,7 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
         int replanCount = 0;
 
         // === PLANNING PHASE ===
-        AgentPlan plan = await CreateAgentPlan(goal, tools, ct, langfuseTrace);
+        AgentPlan plan = await CreateAgentPlan(goal, tools, ct, langfuseTrace, onStepProgress);
 
         // == CONVERSATION SETUP ==
         var messages = new List<ChatMessage>
@@ -80,27 +81,27 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
             try
             {
                 // === THOUGHT PHASE ===
-                var thought = await CreateThoughtStep(ct, langfuseTrace, stepNumber, currentPlanStep, planStepNumber, plan, steps, stepActivity);
+                var thought = await CreateThoughtStep(ct, langfuseTrace, stepNumber, currentPlanStep, planStepNumber, plan, steps, stepActivity, onStepProgress);
 
                 // Inject thought into conversation so the action LLM is guided by it
                 messages.Add(new ChatMessage(ChatRole.Assistant, thought));
 
                 // === ACTION PHASE ===
-                var (response, actionStep) = await Act(tools, ct, langfuseTrace, stepNumber, messages, planStepNumber, steps, stepActivity);
+                var (response, actionStep) = await Act(tools, ct, langfuseTrace, stepNumber, messages, planStepNumber, steps, stepActivity, onStepProgress);
 
                 TraceToolCalls(langfuseTrace, stepNumber, response);
 
                 plan = UpdatePlanStep(currentPlanStep, actionStep, plan);
 
                 // === REFLECTION PHASE ON FAILURE ===
-                (plan, replanCount) = await ReflectIfFailure(tools, ct, actionStep, langfuseTrace, stepNumber, steps, planStepNumber, messages, plan, replanCount);
+                (plan, replanCount) = await ReflectIfFailure(tools, ct, actionStep, langfuseTrace, stepNumber, steps, planStepNumber, messages, plan, replanCount, onStepProgress);
 
                 // === GOAL CHECK ===
                 var goalCheck = await CheckGoal(response, plan, steps, stepNumber, langfuseTrace, ct);
 
                 if (goalCheck.IsAchieved)
                 {
-                    return await GoalAchieved(ct, stepActivity, runActivity, stepNumber, replanCount, langfuseTrace, response, steps, plan);
+                    return await GoalAchieved(ct, stepActivity, runActivity, stepNumber, replanCount, langfuseTrace, response, steps, plan, onStepProgress);
                 }
 
                 if (ShouldTerminate(response, steps))
@@ -196,9 +197,11 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
     }
 
     private async Task<AgentRunResult> GoalAchieved(CancellationToken ct, Activity? stepActivity, Activity? runActivity, int stepNumber,
-        int replanCount, LangfuseTrace langfuseTrace, ChatResponse response, List<AgentStep> steps, AgentPlan plan)
+        int replanCount, LangfuseTrace langfuseTrace, ChatResponse response, List<AgentStep> steps, AgentPlan plan,
+        Func<string, Task>? onStepProgress = null)
     {
         _logger.LogInformation("[GOAL ✅] Achieved at step {Step} (replans: {Replans})", stepNumber, replanCount);
+        if (onStepProgress != null) await onStepProgress($"[GOAL ✅] Achieved at step {stepNumber}");
         stepActivity?.SetTag("step.outcome", "goal_achieved");
         runActivity?.SetTag("agent.outcome", "success");
         runActivity?.SetTag("agent.total_steps", stepNumber);
@@ -212,7 +215,7 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
 
     private async Task<(AgentPlan plan, int replanCount)> ReflectIfFailure(AITool[] tools, CancellationToken ct, AgentStep actionStep,
         LangfuseTrace langfuseTrace, int stepNumber, List<AgentStep> steps, int? planStepNumber, List<ChatMessage> messages, AgentPlan plan,
-        int replanCount)
+        int replanCount, Func<string, Task>? onStepProgress = null)
     {
         if (!actionStep.Success || ContainsFailurePattern(actionStep.ToolResult))
         {
@@ -233,8 +236,9 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
 
             steps.Add(AgentStep.CreateReflection(stepNumber, reflection.Analysis, planStepNumber));
             _logger.LogInformation("[REFLECTION-{Step}] {Analysis}", stepNumber, reflection.Analysis);
+            if (onStepProgress != null) await onStepProgress($"[REFLECTION-{stepNumber}] {reflection.Analysis}");
 
-            (replanCount, plan) = await ReplanIfNeeded(tools, ct, reflection, langfuseTrace, steps, messages, replanCount, plan);
+            (replanCount, plan) = await ReplanIfNeeded(tools, ct, reflection, langfuseTrace, steps, messages, replanCount, plan, onStepProgress);
 
             if (reflection.ShouldEscalateToSupervisor)
             {
@@ -247,7 +251,8 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
     }
 
     private async Task<(int replanCount, AgentPlan plan)> ReplanIfNeeded(AITool[] tools, CancellationToken ct, ReflectionResult reflection,
-        LangfuseTrace langfuseTrace, List<AgentStep> steps, List<ChatMessage> messages, int replanCount, AgentPlan plan)
+        LangfuseTrace langfuseTrace, List<AgentStep> steps, List<ChatMessage> messages, int replanCount, AgentPlan plan,
+        Func<string, Task>? onStepProgress = null)
     {
         if (reflection.ShouldReplan && replanCount < _options.MaxReplans)
         {
@@ -268,6 +273,7 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
 
             _logger.LogInformation("[REPLAN-{Count}] Created new plan v{Version} with {StepCount} steps",
                 replanCount, plan.Version, plan.Steps.Count);
+            if (onStepProgress != null) await onStepProgress($"[REPLAN-{replanCount}] new plan v{plan.Version}");
 
             messages.Add(new ChatMessage(ChatRole.System, _planningService.FormatPlanForContext(plan)));
         }
@@ -289,7 +295,7 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
     }
 
     private async Task<(ChatResponse response, AgentStep actionStep)> Act(AITool[] tools, CancellationToken ct, LangfuseTrace langfuseTrace, int stepNumber, List<ChatMessage> messages,
-        int? planStepNumber, List<AgentStep> steps, Activity? stepActivity)
+        int? planStepNumber, List<AgentStep> steps, Activity? stepActivity, Func<string, Task>? onStepProgress = null)
     {
         var actionGeneration = _langfuse.CreateGeneration(
             langfuseTrace,
@@ -339,6 +345,7 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
                         : null;
                     toolResult = await tool.InvokeAsync(args, ct);
                     _logger.LogInformation("[ACTION-{Step}] Tool {Tool} executed successfully", stepNumber, firstToolCall.Name);
+                    if (onStepProgress != null) await onStepProgress($"[ACTION-{stepNumber}] {firstToolCall.Name} → success");
                 }
                 catch (Exception ex)
                 {
@@ -354,6 +361,7 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
 
             _logger.LogInformation("[OBSERVATION-{Step}] {Tool} → {Result}",
                 stepNumber, firstToolCall.Name, toolResult?.ToString() ?? "no result");
+            if (onStepProgress != null) await onStepProgress($"[OBSERVATION-{stepNumber}] {firstToolCall.Name} → {toolResult?.ToString() ?? "no result"}");
 
             var toolResultContent = new FunctionResultContent(firstToolCall.CallId, toolResult);
             var toolResultMessage = new ChatMessage(ChatRole.Tool, [toolResultContent]);
@@ -385,7 +393,8 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
     }
 
     private async Task<string> CreateThoughtStep(CancellationToken ct, LangfuseTrace langfuseTrace, int stepNumber,
-        PlanStep? currentPlanStep, int? planStepNumber, AgentPlan plan, List<AgentStep> steps, Activity? stepActivity)
+        PlanStep? currentPlanStep, int? planStepNumber, AgentPlan plan, List<AgentStep> steps, Activity? stepActivity,
+        Func<string, Task>? onStepProgress = null)
     {
         var thoughtSpan = _langfuse.CreateGeneration(
             langfuseTrace,
@@ -403,6 +412,7 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
         _langfuse.EndGeneration(thoughtSpan, thought);
 
         _logger.LogInformation("[THOUGHT-{Step}] {Thought}", stepNumber, thought);
+        if (onStepProgress != null) await onStepProgress($"[THOUGHT-{stepNumber}] {thought}");
         stepActivity?.SetTag("step.thought", thought.Length > 100 ? thought[..100] + "..." : thought);
         return thought;
     }
@@ -429,7 +439,8 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
         return goalCheck;
     }
 
-    private async Task<AgentPlan> CreateAgentPlan(string goal, AITool[] tools, CancellationToken ct, LangfuseTrace langfuseTrace)
+    private async Task<AgentPlan> CreateAgentPlan(string goal, AITool[] tools, CancellationToken ct, LangfuseTrace langfuseTrace,
+        Func<string, Task>? onStepProgress = null)
     {
         AgentPlan plan;
         if (_options.UsePlanning)
@@ -442,9 +453,9 @@ public sealed class AutonomousAgentRunner : IAutonomousAgentRunner
 
             plan = await _planningService.CreatePlanAsync(goal, tools, ct);
 
-            _logger.LogInformation("[PLAN] Created plan v{Version}: {Steps}",
-                plan.Version,
-                string.Join(" → ", plan.Steps.Select(s => s.ExpectedTool ?? s.Description)));
+            var steps = string.Join(" → ", plan.Steps.Select(s => s.ExpectedTool ?? s.Description));
+            _logger.LogInformation("[PLAN] Created plan v{Version}: {Steps}", plan.Version, steps);
+            if (onStepProgress != null) await onStepProgress($"[PLAN] Created plan v{plan.Version}: {steps}");
 
             _langfuse.EndSpan(planSpan, JsonSerializer.Serialize(plan));
         }

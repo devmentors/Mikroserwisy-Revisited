@@ -9,9 +9,6 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-AGENT_ZIEMOWIT="00000000-0000-0000-0000-000000000002"
-AGENT_KUNEGUNDA="00000000-0000-0000-0000-000000000003"
-
 # ── Step 1: Clean databases ──────────────────────────────────────────
 
 echo ""
@@ -29,3 +26,18 @@ docker exec $PG_CONTAINER psql -U postgres -d "TicketFlow.Inquiries" -c '
   TRUNCATE public."Inquiries" CASCADE;
 ' > /dev/null 2>&1
 echo -e "  ${GREEN}✓${NC} TicketFlow.Inquiries cleaned"
+
+docker exec $PG_CONTAINER psql -U postgres -d "TicketFlow.SLA" -c '
+  TRUNCATE sla."DeadlineReminders" CASCADE;
+  TRUNCATE outbox."OutboxMessages" CASCADE;
+  TRUNCATE deduplication."DeduplicationEntries" CASCADE;
+' > /dev/null 2>&1
+echo -e "  ${GREEN}✓${NC} TicketFlow.SLA cleaned"
+
+docker exec $PG_CONTAINER psql -U postgres -d "TicketFlow.Communication" -c '
+  TRUNCATE communication."Messages" CASCADE;
+  TRUNCATE communication."Alerts" CASCADE;
+  TRUNCATE outbox."OutboxMessages" CASCADE;
+  TRUNCATE deduplication."DeduplicationEntries" CASCADE;
+' > /dev/null 2>&1
+echo -e "  ${GREEN}✓${NC} TicketFlow.Communication cleaned"

@@ -4,6 +4,7 @@ public class ChatBotOptions
 {
     public Dictionary<string, string> McpServers { get; set; } = new();
     public Dictionary<string, string> A2AAgents { get; set; } = new();
+    public bool UseA2ASdk { get; set; } = false;
     public string EscalationAgentProvider { get; set; } = "csharp";
 
     public string Provider { get; set; } = "openrouter";

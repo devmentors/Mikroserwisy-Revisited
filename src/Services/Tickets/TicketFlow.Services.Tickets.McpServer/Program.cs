@@ -1,4 +1,6 @@
+using Microsoft.Extensions.AI;
 using ModelContextProtocol.Server;
+using OpenAI;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -61,6 +63,32 @@ builder.Services.AddHttpClient<CommunicationApiClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+// LLM client for qualify_ticket tool - supports Ollama (local) and OpenRouter (cloud, default)
+var llmProvider = builder.Configuration["Llm:Provider"] ?? "openrouter";
+builder.Services.AddSingleton<IChatClient>(_ =>
+{
+    if (llmProvider.Equals("openrouter", StringComparison.OrdinalIgnoreCase))
+    {
+        var apiKey = builder.Configuration["Llm:OpenRouterApiKey"]
+            ?? throw new InvalidOperationException("Llm:OpenRouterApiKey is required when Provider is 'openrouter'.");
+        var model = builder.Configuration["Llm:OpenRouterModel"] ?? "google/gemini-2.0-flash-exp:free";
+        var client = new OpenAIClient(
+            new System.ClientModel.ApiKeyCredential(apiKey),
+            new OpenAIClientOptions { Endpoint = new Uri("https://openrouter.ai/api/v1") });
+        return client.GetChatClient(model).AsIChatClient();
+    }
+    else
+    {
+        // Ollama (local)
+        var baseUrl = builder.Configuration["Llm:OllamaBaseUrl"] ?? "http://localhost:11434";
+        var model = builder.Configuration["Llm:OllamaModel"] ?? "qwen3-coder:30b";
+        var client = new OpenAIClient(
+            new System.ClientModel.ApiKeyCredential("ollama"),
+            new OpenAIClientOptions { Endpoint = new Uri($"{baseUrl}/v1") });
+        return client.GetChatClient(model).AsIChatClient();
+    }
+});
+
 // Here goes our quasi auth :)
 var toolRoleMap = new Dictionary<string, string[]>
 {
@@ -75,7 +103,7 @@ var toolRoleMap = new Dictionary<string, string[]>
     ["qualify_ticket"] = ["supervisor", "admin", "escalation_agent"],
     ["apply_qualification"] = ["supervisor", "admin", "escalation_agent"],
     ["assign_ticket"] = ["supervisor", "admin", "escalation_agent"],
-    ["set_ticket_waiting"] = ["supervisor", "admin", "escalation_agent"],
+    // ["set_ticket_waiting"] = ["supervisor", "admin", "escalation_agent"], // Hidden on purpose
     ["notify_supervisor"] = ["supervisor", "admin", "escalation_agent"],
 
     // Knowledge mining tools - for AI agents searching past solutions

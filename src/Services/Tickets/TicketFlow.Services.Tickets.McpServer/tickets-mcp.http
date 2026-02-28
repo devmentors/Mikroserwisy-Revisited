@@ -3,7 +3,7 @@
 ### MCP Card - manifest serwera
 GET {{url}}/mcp/card
 
-### Lista narzędzi - rola: agent (7 narzędzi)
+### Lista narzędzi - rola: agent (6 narzędzi)
 POST {{url}}/
 Content-Type: application/json
 X-User-Role: agent
@@ -51,7 +51,7 @@ X-User-Role: supervisor
   }
 }
 
-### Wywołanie narzędzia: list_tickets_bad (anty-wzorzec)
+### Wywołanie narzędzia: get_ticket (anty-wzorzec - surowy JSON bez kontekstu semantycznego)
 POST {{url}}/
 Content-Type: application/json
 X-User-Role: supervisor
@@ -61,7 +61,9 @@ X-User-Role: supervisor
   "id": "3",
   "method": "tools/call",
   "params": {
-    "name": "list_tickets_bad",
-    "arguments": {}
+    "name": "get_ticket",
+    "arguments": {
+      "ticketId": "REPLACE_WITH_ACTUAL_TICKET_GUID"
+    }
   }
 }

@@ -21,5 +21,6 @@ public interface IAutonomousAgentRunner
         string goal,
         AITool[] tools,
         int maxSteps = 10,
-        CancellationToken ct = default);
+        CancellationToken ct = default,
+        Func<string, Task>? onStepProgress = null);
 }

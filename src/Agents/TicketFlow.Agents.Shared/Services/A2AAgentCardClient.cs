@@ -43,7 +43,12 @@ public record AgentCard(
     string Name,
     string Description,
     string Version,
-    AgentSkill[]? Skills
+    AgentSkill[]? Skills,
+    AgentCapabilities? Capabilities = null
+);
+
+public record AgentCapabilities(
+    bool Streaming = false
 );
 
 public record AgentSkill(

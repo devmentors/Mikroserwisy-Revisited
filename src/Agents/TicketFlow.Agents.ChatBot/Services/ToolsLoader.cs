@@ -15,6 +15,7 @@ internal sealed class ToolsLoader : IToolsLoader
     private readonly IMcpClientFactory _mcpClientFactory;
     private readonly A2AAgentCardClient _a2aCardClient;
     private readonly DynamicA2AToolsBuilder _a2aToolsBuilder;
+    private readonly SdkA2AToolsBuilder _sdkA2AToolsBuilder;
     private readonly ILogger<ToolsLoader> _logger;
 
     public ToolsLoader(
@@ -22,12 +23,14 @@ internal sealed class ToolsLoader : IToolsLoader
         IMcpClientFactory mcpClientFactory,
         A2AAgentCardClient a2aCardClient,
         DynamicA2AToolsBuilder a2aToolsBuilder,
+        SdkA2AToolsBuilder sdkA2AToolsBuilder,
         ILogger<ToolsLoader> logger)
     {
         _options = options.Value;
         _mcpClientFactory = mcpClientFactory;
         _a2aCardClient = a2aCardClient;
         _a2aToolsBuilder = a2aToolsBuilder;
+        _sdkA2AToolsBuilder = sdkA2AToolsBuilder;
         _logger = logger;
     }
 
@@ -130,12 +133,22 @@ internal sealed class ToolsLoader : IToolsLoader
         {
             try
             {
-                var agentCard = await _a2aCardClient.FetchAgentCardAsync(agentUrl);
-                var a2aTools = _a2aToolsBuilder.BuildToolsFromSkills(agentCard, agentUrl, agentName);
-
-                tools.AddRange(a2aTools);
-                _logger.LogInformation("Added {Count} A2A tools from {Agent} as '{AgentName}'",
-                    a2aTools.Count, agentCard?.Name ?? "unknown", agentName);
+                if (_options.UseA2ASdk)
+                {
+                    _logger.LogInformation("[A2A] Using SDK-based client for {Agent}", agentName);
+                    var sdkTools = await _sdkA2AToolsBuilder.BuildToolsFromAgentAsync(agentUrl, agentName, ct);
+                    tools.AddRange(sdkTools);
+                    _logger.LogInformation("Added {Count} A2A-SDK tools from {Agent}", sdkTools.Count, agentName);
+                }
+                else
+                {
+                    _logger.LogInformation("[A2A] Using custom client for {Agent}", agentName);
+                    var agentCard = await _a2aCardClient.FetchAgentCardAsync(agentUrl);
+                    var a2aTools = _a2aToolsBuilder.BuildToolsFromSkills(agentCard, agentUrl, agentName);
+                    tools.AddRange(a2aTools);
+                    _logger.LogInformation("Added {Count} A2A tools from {Agent} as '{AgentName}'",
+                        a2aTools.Count, agentCard?.Name ?? "unknown", agentName);
+                }
             }
             catch (Exception ex)
             {
@@ -150,16 +163,33 @@ internal sealed class ToolsLoader : IToolsLoader
         {
             try
             {
-                var agentCard = await _a2aCardClient.FetchAgentCardAsync(agentUrl);
-
-                if (agentCard?.Skills != null)
+                if (_options.UseA2ASdk)
                 {
-                    foreach (var skill in agentCard.Skills)
+                    var sdkCard = await _sdkA2AToolsBuilder.FetchAgentCardAsync(agentUrl, ct);
+                    if (sdkCard.Skills != null)
                     {
-                        tools.Add(new ToolInfo(
-                            skill.Id.Replace("-", "_"),
-                            skill.Description,
-                            $"{agentCard.Name} (A2A)"));
+                        foreach (var skill in sdkCard.Skills)
+                        {
+                            tools.Add(new ToolInfo(
+                                skill.Id.Replace("-", "_"),
+                                skill.Description,
+                                $"{sdkCard.Name} (A2A-SDK)"));
+                        }
+                    }
+                }
+                else
+                {
+                    var agentCard = await _a2aCardClient.FetchAgentCardAsync(agentUrl);
+
+                    if (agentCard?.Skills != null)
+                    {
+                        foreach (var skill in agentCard.Skills)
+                        {
+                            tools.Add(new ToolInfo(
+                                skill.Id.Replace("-", "_"),
+                                skill.Description,
+                                $"{agentCard.Name} (A2A)"));
+                        }
                     }
                 }
             }

@@ -39,13 +39,14 @@ internal sealed class AguiRequestHandler : IAguiRequestHandler
         var userId = context.Request.Headers["X-User-Id"].FirstOrDefault();
         var parentTraceId = context.Request.Headers["X-Trace-Id"].FirstOrDefault();
 
-        // Ambient trace context for Langfuse 
+        // Ambient trace context for Langfuse
         using var _ = AmbientTraceContext.SetContext(new LangfuseTraceContext
         {
             SessionId = threadId,  // All traces into one conversation
             UserId = userId,
             ParentTraceId = parentTraceId
         });
+        using var __ = AmbientAgentProgress.Activate(_sseWriter, context, threadId, runId);
 
         messages.Add(new ChatMessage(ChatRole.System, systemPrompt));
 
