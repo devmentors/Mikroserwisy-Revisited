@@ -1,4 +1,4 @@
-<img width="1620" height="260" alt="mikro_revisited_lg_v2" src="https://github.com/user-attachments/assets/e81f0e0d-af13-4676-a9c1-01e40044f511" />
+<a href="https://mikroserwisy-revisited.pl"><img width="1620" height="260" alt="mikro_revisited_lg_v2" src="https://github.com/user-attachments/assets/e81f0e0d-af13-4676-a9c1-01e40044f511" /></a>
 
 # Mikroserwisy: Revisited
 
@@ -14,7 +14,7 @@ Z samym kursem mozesz zapoznac sie na: https://mikroserwisy-revisited.pl
 
 Ticketflow to **rozproszony** **system ticketowy**, w którym w prosty sposób zespół anglojezyczny jest w stanie obsługiwać zgłoszenia klientów z całego świata. Dodatkowo, by utrzymać SLA wynikające z umów podpisanych z klientami, system (poza wspieraniem procesu obsługi ticketow) wspiera agentów service desk w postaci przypomnień, alertowania czy prezentowania metryk na żywo.
 
-Dla osób zaznajomionych z naszą twórczością, z punktu "domenowego" jest to rozwiniecie rozwazan nad aplikacją znaną z innego kursu: [**Messaging:Pragmatycznie**](https://messaging-pragmatycznie.pl/)
+Dla osób zaznajomionych z naszą twórczością, z punktu "domenowego" jest to rozwinięcie rozważań nad aplikacją znaną z innego kursu: [**Messaging:Pragmatycznie**](https://messaging-pragmatycznie.pl/)
 
 
 ## Stos technologiczny
@@ -84,4 +84,5 @@ Repozytorium obejmuje material z 9 modulow tematycznych:
 
 
 ## Wsparcie
+<a href="https://devmentors.circle.so"><img width="1620" height="260" alt="circle_support" src="https://github.com/user-attachments/assets/4f4bce99-e0c5-42e3-9867-f378b61b8826" /></a>
 
