@@ -9,4 +9,6 @@ public sealed record InquirySubmitted(
     string Description,
     string Category,
     string LanguageCode,
-    DateTimeOffset CreatedAt) : IMessage;
+    DateTimeOffset CreatedAt,
+    string? SubmittedVia,
+    string? ClientIpHash) : IMessage;

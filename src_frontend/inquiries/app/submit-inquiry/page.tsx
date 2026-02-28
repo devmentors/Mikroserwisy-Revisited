@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from '@/components/ui/select'
 import { InquiryCategory, InquiryStatus } from '@/app/types/enums'
 import { inquiryCategoryTranslations } from '@/app/lib/translations'
-import { createInquiry } from '@/app/services/inquiryService';
+import { createInquiry, DEMO_USER_EMAIL } from '@/app/services/inquiryService';
 
 const categoryOptions = [
   { value: InquiryCategory.TECHNICAL, label: inquiryCategoryTranslations[InquiryCategory.TECHNICAL] },
@@ -41,7 +41,7 @@ const InquiryForm: React.FC = () => {
     defaultValues: {
       title: '',
       name: '',
-      email: '',
+      email: DEMO_USER_EMAIL,  // Fixed for demo - simulates logged-in user
       description: '',
       category: InquiryCategory.TECHNICAL,
     }
@@ -104,9 +104,9 @@ const InquiryForm: React.FC = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email (demo user)</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="twoj@email.com" {...field} />
+                    <Input type="email" disabled {...field} className="bg-muted" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

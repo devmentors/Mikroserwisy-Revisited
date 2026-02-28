@@ -4,7 +4,10 @@ using TicketFlow.Services.Communication.Api.DTO;
 using TicketFlow.Services.Communication.Core;
 using TicketFlow.Services.Communication.Core.Data;
 using TicketFlow.Services.Communication.Core.Data.Models;
+using TicketFlow.Services.Communication.Core.ExternalServices.Email;
+using TicketFlow.Services.Communication.Core.Http.Agents;
 using TicketFlow.Services.Communication.Core.Validators;
+using TicketFlow.CourseUtils;
 using TicketFlow.Shared.AnomalyGeneration.HttpApi;
 using TicketFlow.Shared.AspNetCore;
 using TicketFlow.Shared.Exceptions;
@@ -17,6 +20,7 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseExceptions();
 app.UseMetrics();
 app.ExposeApiForFrontend();
 app.UseAnomalyEndpoints();
@@ -82,6 +86,7 @@ app.MapGet("/logged-users/{userId}/messages/", async (
 
 app.MapGet("/anonymous-users/messages/", async (
     [FromServices] CommunicationDbContext dbContext,
+    [FromServices] IAgentClient agentClient,
     [FromQuery] bool onlyUnread = false,
     [FromQuery] int page = 1,
     [FromQuery] int limit = 10,
@@ -89,22 +94,52 @@ app.MapGet("/anonymous-users/messages/", async (
 {
     var dbQuery = dbContext.Messages
         .AsQueryable()
-        .Where(x => x.RecipentUserId == null); // Recipient UserId == null -> anonymous user from Inquiries
-    
+        .Where(x => x.RecipentUserId == null);
+
     if (onlyUnread)
     {
         dbQuery = dbQuery.Where(x => !x.IsRead);
     }
-    
+
     var total = await dbQuery.CountAsync(cancellationToken);
-    
-    var data = await dbQuery
+
+    var messages = await dbQuery
         .OrderByDescending(x => x.Timestamp)
         .Skip((page - 1) * limit)
         .Take(limit)
         .ToListAsync(cancellationToken);
-    
-    return new MessageListDto(data, total);
+
+    var messagesWithSenders = new List<MessageWithSenderDto>();
+    foreach (var msg in messages)
+    {
+        var senderDisplayName = "SYSTEM";
+        if (msg.SenderUserId.HasValue)
+        {
+            var agent = await agentClient.GetAgentAsync(msg.SenderUserId.Value.ToString(), cancellationToken);
+            if (agent is not null)
+            {
+                senderDisplayName = agent.DisplayName;
+            }
+        }
+
+        var preview = msg.Content.Length > 100
+            ? msg.Content[..100] + "..."
+            : msg.Content;
+
+        messagesWithSenders.Add(new MessageWithSenderDto(
+            msg.Id,
+            msg.RecipentEmail,
+            msg.RecipentUserId,
+            msg.SenderUserId,
+            senderDisplayName,
+            msg.Title,
+            preview,
+            msg.Content,
+            msg.Timestamp,
+            msg.IsRead));
+    }
+
+    return new MessageWithSenderListDto(messagesWithSenders, total);
 });
 
 app.MapPut("/messages/{messageId}", async (
@@ -122,13 +157,21 @@ app.MapPut("/messages/{messageId}", async (
 app.MapPost("/messages", async (
     [FromBody] Message message,
     [FromServices] CommunicationDbContext dbContext,
+    [FromServices] IEmailService emailService,
     CancellationToken cancellationToken) =>
 {
     new MessageValidator().Validate(message);
 
+    if (FeatureFlags.UseEmailNotifications)
+    {
+        var email = new EmailMessage(message.RecipentEmail, message.Title, message.Content, EmailPriority.Normal);
+        var result = await emailService.SendAsync(email, cancellationToken);
+        return Results.Ok(new { emailSent = result.Success, emailError = result.ErrorMessage });
+    }
+
     dbContext.Messages.Add(message);
     await dbContext.SaveChangesAsync(cancellationToken);
-    return Results.Ok();
+    return Results.Ok(new { saved = true });
 });
 
 app.Run();

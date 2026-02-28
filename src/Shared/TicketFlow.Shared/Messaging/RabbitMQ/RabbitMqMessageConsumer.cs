@@ -196,7 +196,7 @@ internal sealed class RabbitMqMessageConsumer(
         return this;
     }
 
-    private async Task HandleMessageAsync<TMessage>(BasicDeliverEventArgs ea, Func<TMessage, Task>? handle = default, 
+    private async Task HandleMessageAsync<TMessage>(BasicDeliverEventArgs ea, Func<TMessage, Task>? handle = default,
         CancellationToken cancellationToken = default) where TMessage : class, IMessage
     {
         var message = serializer.DeserializeBinary<TMessage>(ea.Body.ToArray());

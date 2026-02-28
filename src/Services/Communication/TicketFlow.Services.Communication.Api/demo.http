@@ -1,0 +1,23 @@
+@host = http://localhost:5600
+@mock = http://localhost:6150
+
+### Wyslij maila przez CommunicationService (-> MockSendGrid)
+POST {{host}}/messages
+Content-Type: application/json
+
+{
+  "recipentEmail": "klient@example.com",
+  "title": "Twoje zgloszenie zostalo przyjete",
+  "content": "Dziekujemy za kontakt. Numer sprawy: TKT-2024-001",
+  "timestamp": "2026-01-27T12:00:00Z",
+  "isRead": false
+}
+
+### Mock admin - stats
+GET {{mock}}/admin/stats
+
+### Mock admin - reset
+POST {{mock}}/admin/reset
+
+### Mock admin - invalidate token
+POST {{mock}}/admin/invalidate-token

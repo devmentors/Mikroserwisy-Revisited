@@ -10,7 +10,7 @@ public static class InquiriesEndpointsV2
     public static IEndpointRouteBuilder MapInquiriesV2(this IEndpointRouteBuilder app)
     {
         var v2 = app.NewVersionedApi()
-            .MapGroup("/v2/inquiries")
+            .MapGroup("/v{version:apiVersion}/inquiries")
             .HasApiVersion(2, 0);
 
         v2.MapPost("/", SubmitInquiry)
@@ -73,7 +73,7 @@ public static class InquiriesEndpointsV2
     }
 
     private static async Task<IResult> ListInquiries(
-        [FromQuery] string email,
+        [FromQuery] string? email,
         [FromQuery] int? page,
         [FromQuery] int? limit,
         IInquiriesClient client,

@@ -10,6 +10,7 @@ using TicketFlow.Services.Tickets.Core.Commands.UnblockTicket;
 using TicketFlow.Services.Tickets.Core.Data.Models;
 using TicketFlow.Services.Tickets.Core.Queries.GetClientNotesForTicket;
 using TicketFlow.Services.Tickets.Core.Queries.GetTicketDetails;
+using TicketFlow.Services.Tickets.Core.Queries.GetAgentByUserId;
 using TicketFlow.Services.Tickets.Core.Queries.ListAgents;
 using TicketFlow.Services.Tickets.Core.Queries.SearchTicketsByPerson;
 using TicketFlow.Services.Tickets.Core.Queries.ListTickets;
@@ -131,22 +132,20 @@ app.MapGet("/agents", async (
 
 app.MapGet("/agents/{id}", async (
     [FromRoute] string id,
-    [FromServices] IQueryHandler<ListAgentsQuery, AgentDto[]> handler,
+    [FromServices] IQueryHandler<GetAgentByUserId, AgentDetailsDto> handler,
     CancellationToken cancellationToken) =>
 {
-    //We have only 3 agents in system, so it's cheaper to just reuse fetching them all
-    var allAgents = await handler.HandleAsync(new ListAgentsQuery(), cancellationToken);
-    return allAgents.SingleOrDefault(x => x.Id.Equals(id, StringComparison.InvariantCultureIgnoreCase));
+    var result = await handler.HandleAsync(new GetAgentByUserId(id), cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
 });
 
 app.MapGet("/users/{id}", async (
     [FromRoute] string id,
-    [FromServices] IQueryHandler<ListAgentsQuery, AgentDto[]> handler,
+    [FromServices] IQueryHandler<GetAgentByUserId, AgentDetailsDto> handler,
     CancellationToken cancellationToken) =>
 {
-    //We have only 3 agents in system, so it's cheaper to just reuse fetching them all
-    var allAgents = await handler.HandleAsync(new ListAgentsQuery(), cancellationToken);
-    return allAgents.SingleOrDefault(x => x.UserId.Equals(id, StringComparison.InvariantCultureIgnoreCase));
+    var result = await handler.HandleAsync(new GetAgentByUserId(id), cancellationToken);
+    return result is null ? Results.NotFound() : Results.Ok(result);
 });
 
 app.MapPost("/tickets/by-tokens", async (

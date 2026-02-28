@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using TicketFlow.Services.SLA.Core.Data.Models;
 using TicketFlow.Services.SLA.Core.Data.Repositories;
+using TicketFlow.Services.SLA.Core.Http.Billing;
 using TicketFlow.Services.SLA.Core.Http.Tickets;
 using TicketFlow.Services.SLA.Core.Messaging.Publishing;
 using TicketFlow.Shared.Exceptions;
@@ -11,22 +12,25 @@ namespace TicketFlow.Services.SLA.Core.Messaging.Consuming.ApplicationServices;
 public class TicketService
 {
     private readonly ITicketsClient _ticketsClient;
+    private readonly IBillingClient _billingClient;
     private readonly ISLARepository _slaRepository;
     private readonly IMessagePublisher _publisher;
     private readonly ILogger<TicketService> _logger;
 
     public TicketService(
         ITicketsClient ticketsClient,
+        IBillingClient billingClient,
         ISLARepository slaRepository,
         IMessagePublisher publisher,
         ILogger<TicketService> logger)
     {
         _ticketsClient = ticketsClient;
+        _billingClient = billingClient;
         _slaRepository = slaRepository;
         _publisher = publisher;
         _logger = logger;
     }
-    
+
     public async Task HandleTicketQualifiedAsync(Guid ticketId, int version, CancellationToken cancellationToken = default)
     {
         var ticketDetails = await _ticketsClient.GetTicketDetails(ticketId.ToString(), cancellationToken);
@@ -34,13 +38,13 @@ public class TicketService
         {
             throw new TicketFlowException($"Could not fetch data of ticket: {ticketId}");
         }
-        
+
         var serviceType = ticketDetails.Type.ParseAsServiceType() ?? ServiceType.Unknown;
         if (serviceType == ServiceType.Unknown)
         {
             throw new TicketFlowException("Unknown service type");
         }
-        
+
         // Do we know this ticket based on reminders?
         var existingReminders = await _slaRepository.GetRemindersFor(
             serviceType: serviceType,
@@ -53,8 +57,15 @@ public class TicketService
             var sla = await _slaRepository.GetSLAByRequestorDomain(domain, cancellationToken) ??
                       Defaults.SLA; // If no signed SLA - use defaults
 
-            var deadline = sla.CalculatedDeadlineFor(ticketDetails.CreatedAt, serviceType,
-                ticketDetails.SeverityLevel!.Value);
+            // Check payment standing and determine effective tier (may be downgraded)
+            var effectiveTier = await DetermineEffectiveTierAsync(
+                sla.ClientTier, domain, cancellationToken);
+
+            var deadline = sla.CalculatedDeadlineFor(
+                ticketDetails.CreatedAt,
+                serviceType,
+                ticketDetails.SeverityLevel!.Value,
+                effectiveTier);
 
             if (deadline is not null)
             {
@@ -91,13 +102,13 @@ public class TicketService
         {
             throw new TicketFlowException($"Could not fetch data of ticket: {ticketId}");
         }
-        
+
         var serviceType = ticketDetails.Type.ParseAsServiceType() ?? ServiceType.Unknown;
         if (serviceType == ServiceType.Unknown)
         {
             throw new TicketFlowException("Unknown service type");
         }
-        
+
         var existingReminders = await _slaRepository.GetRemindersFor(
             serviceType: serviceType,
             serviceSourceId: ticketId.ToString(),
@@ -107,12 +118,12 @@ public class TicketService
         {
             throw new TicketFlowException($"Could not find existing reminders for ticket: {ticketId}");
         }
-        
+
         existingReminders.UserIdToRemind = ticketDetails.AssignedAgentUserId;
         existingReminders.ServiceLastKnownVersion = version;
         await _slaRepository.SaveReminders(existingReminders, cancellationToken);
     }
-    
+
     public async Task HandleTicketResolvedAsync(Guid ticketId, int version, CancellationToken cancellationToken = default)
     {
         var existingReminders = await _slaRepository.GetRemindersFor(
@@ -124,7 +135,7 @@ public class TicketService
         {
             throw new TicketFlowException($"Could not fetch data of ticket: {ticketId}");
         }
-        
+
         existingReminders.UpdateFromServiceChange(TicketStatus.Resolved);
         existingReminders.ServiceLastKnownVersion = version;
         await _slaRepository.SaveReminders(existingReminders, cancellationToken);
@@ -137,8 +148,65 @@ public class TicketService
             anyOfServiceTypes: [ServiceType.QuestionTicket, ServiceType.IncidentTicket],
             serviceSourceId: ticketId.ToString(),
             cancellationToken);
-        
+
         existingReminders.ServiceLastKnownVersion = version;
         await _slaRepository.SaveReminders(existingReminders, cancellationToken);
+    }
+    
+    private async Task<SLATier> DetermineEffectiveTierAsync(
+        SLATier contractedTier, string domain, CancellationToken ct)
+    {
+        var paymentStanding = await _billingClient.GetPaymentStandingAsync(domain, ct);
+
+        // Graceful degradation: if billing unavailable, use contracted tier
+        if (paymentStanding is null)
+        {
+            _logger.LogDebug(
+                "Billing service unavailable for {Domain}. Using contracted tier: {Tier}",
+                domain, contractedTier);
+            return contractedTier;
+        }
+
+        // Customer in good standing - no downgrade needed
+        if (paymentStanding.InGoodStanding)
+        {
+            _logger.LogDebug(
+                "Customer {Domain} in good standing. Using contracted tier: {Tier}",
+                domain, contractedTier);
+            return contractedTier;
+        }
+
+        // Calculate downgrade based on days overdue
+        var downgradeSteps = paymentStanding.DaysOverdue switch
+        {
+            >= 60 => 2,  // 60+ days: drop 2 tiers (VIP -> Standard)
+            >= 30 => 1,  // 30+ days: drop 1 tier (VIP -> Premium)
+            _ => 0       // Less than 30 days: no downgrade
+        };
+
+        var effectiveTier = DowngradeTier(contractedTier, downgradeSteps);
+
+        if (effectiveTier != contractedTier)
+        {
+            _logger.LogWarning(
+                "Customer {Domain} SLA downgraded {ContractedTier}->{EffectiveTier} " +
+                "({DaysOverdue} days overdue, ${OverdueAmount} outstanding)",
+                domain,
+                contractedTier,
+                effectiveTier,
+                paymentStanding.DaysOverdue,
+                paymentStanding.OverdueAmount);
+        }
+
+        return effectiveTier;
+    }
+
+    // Downgrades tier by specified number of steps.
+    // VIP(2) -> Premium(1) -> Standard(0) -> Basic(-1)
+    // Cannot go below Basic.
+    private static SLATier DowngradeTier(SLATier tier, int steps)
+    {
+        var newValue = Math.Max((int)SLATier.Basic, (int)tier - steps);
+        return (SLATier)newValue;
     }
 }

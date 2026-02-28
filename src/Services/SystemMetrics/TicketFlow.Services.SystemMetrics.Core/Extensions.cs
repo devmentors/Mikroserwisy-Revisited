@@ -23,7 +23,7 @@ public static class Extensions
     {
         services
             .AddExceptions()
-            .AddSerialization()
+            .AddSerialization(configuration)
             .AddApp(configuration)
             .AddCommands()
             .AddQueries()

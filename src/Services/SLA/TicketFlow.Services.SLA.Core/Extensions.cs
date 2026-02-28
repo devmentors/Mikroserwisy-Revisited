@@ -4,6 +4,7 @@ using TicketFlow.CourseUtils;
 using TicketFlow.Services.SLA.Core.Data;
 using TicketFlow.Services.SLA.Core.Data.Repositories;
 using TicketFlow.Services.SLA.Core.Http;
+using TicketFlow.Services.SLA.Core.Http.Billing;
 using TicketFlow.Services.SLA.Core.Http.Communication;
 using TicketFlow.Services.SLA.Core.Http.Tickets;
 using TicketFlow.Services.SLA.Core.Initializers;
@@ -42,7 +43,7 @@ public static class Extensions
         services
             .AddExceptions()
             .AddApp(configuration)
-            .AddSerialization()
+            .AddSerialization(configuration)
             .AddAppInitializers()
             .AddCommands()
             .AddQueries()
@@ -70,7 +71,15 @@ public static class Extensions
         {
             builder.BaseAddress = new Uri(configuration.GetValue<string>("Services:Communication"));
         });
-        
+
+        services.AddHttpClient<IBillingClient, BillingClient>(builder =>
+        {
+            builder.BaseAddress = new Uri(
+                configuration.GetValue<string>("Services:BillingIntegration")
+                ?? "http://localhost:6000");
+            builder.Timeout = TimeSpan.FromSeconds(5);
+        });
+
         services.AddHostedService<SLAConsumerService>();
         services.AddHostedService<SLATopologyInitializer>();
         services.AddTransient<ISLARepository, SLARepository>();

@@ -30,7 +30,8 @@ public class GetTicketDetailsQueryHandler(
                 result.Severity,
                 result.AssignedAgent?.UserId,
                 result.Type?.ToString(),
-                result.Resolution);
+                result.Resolution,
+                result.LanguageCode);
         }
         catch (Exception ex)
         {

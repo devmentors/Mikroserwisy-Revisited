@@ -1,8 +1,9 @@
-﻿namespace TicketFlow.Services.SLA.Core.Data.Models;
+namespace TicketFlow.Services.SLA.Core.Data.Models;
 
 public enum SLATier
 {
-    Standard,
-    Premium,
-    VIP
+    Basic = -1,
+    Standard = 0,
+    Premium = 1,
+    VIP = 2
 }

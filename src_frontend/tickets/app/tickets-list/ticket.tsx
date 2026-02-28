@@ -157,14 +157,18 @@ export const columns: ColumnDef<Ticket>[] = [
       if (isLoading) return <span className="text-muted-foreground text-sm">Wczytuje...</span>
       if (!agent) return <span className="text-muted-foreground text-sm">Agent nieznaleziony</span>
 
+      const displayName = agent.fullName || '???'
+      const displayPosition = agent.position || '???'
+      const initials = displayName[0] + (displayName.split(' ')?.[1]?.[0] || '')
+
       return (
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={agent.avatarUrl} alt={`${agent.fullName}`} />
-            <AvatarFallback className="text-xs">{agent.fullName[0] + agent.fullName.split(' ')?.[0]}</AvatarFallback>
+            <AvatarImage src={agent.avatarUrl} alt={displayName} />
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
-          <span>{agent.fullName}</span>
-          <span className="text-xs text-muted-foreground">{agent.position}</span>
+          <span className={!agent.fullName ? 'text-red-500' : ''}>{displayName}</span>
+          <span className={`text-xs ${!agent.position ? 'text-red-500' : 'text-muted-foreground'}`}>{displayPosition}</span>
         </div>
       )
     }
