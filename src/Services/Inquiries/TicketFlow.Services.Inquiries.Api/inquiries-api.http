@@ -1,4 +1,4 @@
-@url = http://localhost:5011
+@url = http://localhost:5500
 @email = user@test.com
 
 ###
