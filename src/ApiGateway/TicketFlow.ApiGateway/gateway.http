@@ -1,0 +1,109 @@
+@gateway = http://localhost:5000
+@ticketId = 15e663da-d2e3-41db-a3ab-5760b9bbeff8
+@agentId = 00000000-0000-0000-0000-000000000001
+@inquiryId = 00000000-0000-0000-0000-000000000001
+@userId = user-123
+@messageId = 00000000-0000-0000-0000-000000000001
+@alertId = 00000000-0000-0000-0000-000000000001
+
+### =====================
+### INQUIRIES
+### =====================
+
+### Get inquiries list
+GET {{gateway}}/inquiries?page=1&limit=10
+
+### Submit new inquiry
+POST {{gateway}}/inquiries/submit
+Content-Type: application/json
+
+{
+  "title": "Test inquiry",
+  "description": "This is a test inquiry from API Gateway"
+}
+
+### Add comment to inquiry
+POST {{gateway}}/inquiries/{{inquiryId}}/comments
+Content-Type: application/json
+
+{
+  "content": "This is a test comment"
+}
+
+### =====================
+### TICKETS
+### =====================
+
+### Get tickets list
+GET {{gateway}}/tickets?page=1&limit=10
+
+### Qualify ticket
+POST {{gateway}}/tickets/{{ticketId}}/qualify
+Content-Type: application/json
+
+{
+  "TicketType": 1
+}
+
+### Assign agent to ticket
+POST {{gateway}}/tickets/{{ticketId}}/assign/{{agentId}}
+
+### Block ticket
+POST {{gateway}}/tickets/{{ticketId}}/block/maintenance
+
+### Unblock ticket
+POST {{gateway}}/tickets/{{ticketId}}/unblock/completed
+
+### Resolve ticket
+POST {{gateway}}/tickets/{{ticketId}}/resolve/fixed
+
+### Get ticket client notes
+GET {{gateway}}/tickets/{{ticketId}}/client-notes
+
+### Add ticket client note
+POST {{gateway}}/tickets/{{ticketId}}/client-notes
+Content-Type: application/json
+
+{
+  "content": "Client note from gateway"
+}
+
+### =====================
+### AGENTS
+### =====================
+
+### Get all agents
+GET {{gateway}}/agents
+
+### Get agent by ID
+GET {{gateway}}/agents/{{agentId}}
+
+### =====================
+### MESSAGES & ALERTS
+### =====================
+
+### Get messages for logged user
+GET {{gateway}}/logged-users/{{userId}}/messages?page=1&limit=10&onlyUnread=false
+
+### Get messages for anonymous user
+GET {{gateway}}/anonymous-users/messages?page=1&limit=10&onlyUnread=false
+
+### Mark message as read
+PUT {{gateway}}/messages/{{messageId}}?isRead=true
+
+### Get alerts
+GET {{gateway}}/alerts?onlyUnread=false
+
+### Mark alert as read
+PUT {{gateway}}/alerts/{{alertId}}?isRead=true
+
+### =====================
+### NOT EXPOSED (internal only)
+### These should return 404 from Gateway
+### =====================
+
+### SLA deadlines (internal) - should fail
+GET {{gateway}}/sla/deadlines
+
+### Translations (internal) - should fail
+GET {{gateway}}/translations

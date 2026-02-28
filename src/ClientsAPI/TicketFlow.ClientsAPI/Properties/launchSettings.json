@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "TicketFlow.ClientsAPI": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5050",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

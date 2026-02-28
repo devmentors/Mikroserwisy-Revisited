@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: tickets-service
+  description: Manages ticket lifecycle, assignments, and resolutions
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - dotnet
+    - api
+    - rabbitmq
+  links:
+    - url: http://localhost:5112
+      title: API
+      icon: web
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-team-1
+  system: ticketflow
+  providesApis:
+    - tickets-api
+  dependsOn:
+    - component:inquiries-service
+    - component:translations-service
+    - component:sla-service

@@ -1,0 +1,63 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'ticketflow-gateway'
+    static_configs:
+      - targets: ['host.docker.internal:5100']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-bff'
+    static_configs:
+      - targets: ['host.docker.internal:5200']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-aggregation'
+    static_configs:
+      - targets: ['host.docker.internal:5300']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-tickets'
+    static_configs:
+      - targets: ['host.docker.internal:5400']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-inquiries'
+    static_configs:
+      - targets: ['host.docker.internal:5500']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-communication'
+    static_configs:
+      - targets: ['host.docker.internal:5600']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-sla'
+    static_configs:
+      - targets: ['host.docker.internal:5700']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-translations'
+    static_configs:
+      - targets: ['host.docker.internal:5800']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-system-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:5900']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-vault'
+    static_configs:
+      - targets: ['host.docker.internal:6100']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-anonymization'
+    static_configs:
+      - targets: ['host.docker.internal:6200']
+    metrics_path: /metrics

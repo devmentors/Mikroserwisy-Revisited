@@ -1,0 +1,3 @@
+dotnet ef database update --startup-project ./TicketFlow.Services.Communication.Api/TicketFlow.Services.Communication.Api.csproj --context CommunicationDbContext
+dotnet ef database update --startup-project ./TicketFlow.Services.Communication.Api/TicketFlow.Services.Communication.Api.csproj --context DeduplicationDbContext
+dotnet ef database update --startup-project ./TicketFlow.Services.Communication.Api/TicketFlow.Services.Communication.Api.csproj --context OutboxDbContext

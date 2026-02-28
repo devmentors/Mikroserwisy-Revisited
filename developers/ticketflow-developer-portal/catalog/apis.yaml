@@ -1,0 +1,480 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: inquiries-api
+  description: REST API for submitting and managing customer inquiries
+  tags:
+    - rest
+    - inquiries
+spec:
+  type: openapi
+  lifecycle: production
+  owner: group:ticketflow-team-1
+  system: ticketflow
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: Inquiries API
+      version: 1.0.0
+      description: API for submitting and managing customer inquiries
+    servers:
+      - url: http://localhost:5011
+    paths:
+      /:
+        get:
+          summary: Health check
+          responses:
+            '200':
+              description: Service is healthy
+      /inquiries:
+        get:
+          summary: List inquiries with pagination
+          parameters:
+            - name: page
+              in: query
+              schema:
+                type: integer
+            - name: limit
+              in: query
+              schema:
+                type: integer
+          responses:
+            '200':
+              description: List of inquiries
+      /inquiries/submit:
+        post:
+          summary: Submit inquiry (async or sync based on feature flags)
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    content:
+                      type: string
+                    email:
+                      type: string
+          responses:
+            '202':
+              description: Inquiry submitted
+      /inquiries/submit-sync:
+        post:
+          summary: Submit inquiry synchronously
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+          responses:
+            '200':
+              description: Inquiry submitted and processed
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: tickets-api
+  description: REST API for ticket lifecycle management, assignments, and resolutions
+  tags:
+    - rest
+    - tickets
+    - agents
+spec:
+  type: openapi
+  lifecycle: production
+  owner: group:ticketflow-team-1
+  system: ticketflow
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: Tickets API
+      version: 1.0.0
+      description: API for ticket lifecycle management
+    servers:
+      - url: http://localhost:5112
+    paths:
+      /:
+        get:
+          summary: Health check
+          responses:
+            '200':
+              description: Service is healthy
+      /tickets:
+        get:
+          summary: List tickets with filtering
+          parameters:
+            - name: agentId
+              in: query
+              schema:
+                type: string
+            - name: status
+              in: query
+              schema:
+                type: string
+            - name: page
+              in: query
+              schema:
+                type: integer
+            - name: limit
+              in: query
+              schema:
+                type: integer
+          responses:
+            '200':
+              description: List of tickets
+        post:
+          summary: Create ticket synchronously
+          responses:
+            '201':
+              description: Ticket created
+      /tickets/{ticketId}:
+        get:
+          summary: Get ticket details
+          parameters:
+            - name: ticketId
+              in: path
+              required: true
+              schema:
+                type: string
+          responses:
+            '200':
+              description: Ticket details
+      /tickets/{ticketId}/qualify:
+        post:
+          summary: Qualify ticket
+          parameters:
+            - name: ticketId
+              in: path
+              required: true
+              schema:
+                type: string
+          responses:
+            '200':
+              description: Ticket qualified
+      /tickets/{ticketId}/assign/{agentId}:
+        post:
+          summary: Assign agent to ticket
+          parameters:
+            - name: ticketId
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: agentId
+              in: path
+              required: true
+              schema:
+                type: string
+          responses:
+            '200':
+              description: Agent assigned
+      /tickets/{ticketId}/block/{reason}:
+        post:
+          summary: Block ticket
+          responses:
+            '200':
+              description: Ticket blocked
+      /tickets/{ticketId}/unblock/{reason}:
+        post:
+          summary: Unblock ticket
+          responses:
+            '200':
+              description: Ticket unblocked
+      /tickets/{ticketId}/resolve/{resolution}:
+        post:
+          summary: Resolve ticket
+          responses:
+            '200':
+              description: Ticket resolved
+      /tickets/{ticketId}/client-notes:
+        get:
+          summary: Get client notes for ticket
+          responses:
+            '200':
+              description: Client notes
+        post:
+          summary: Add client note
+          responses:
+            '201':
+              description: Note added
+      /agents:
+        get:
+          summary: List all agents
+          responses:
+            '200':
+              description: List of agents
+      /agents/{id}:
+        get:
+          summary: Get agent by ID
+          responses:
+            '200':
+              description: Agent details
+      /users/{id}:
+        get:
+          summary: Get user by ID
+          responses:
+            '200':
+              description: User details
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: sla-api
+  description: REST API for SLA monitoring and deadline reminders
+  tags:
+    - rest
+    - sla
+    - deadlines
+spec:
+  type: openapi
+  lifecycle: production
+  owner: group:ticketflow-team-3
+  system: ticketflow
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: SLA API
+      version: 1.0.0
+      description: API for SLA monitoring and deadline management
+    servers:
+      - url: http://localhost:5054
+    paths:
+      /sla/{serviceType}/{serviceSourceId}/deadline-reminders:
+        get:
+          summary: Get deadline reminders for a service
+          parameters:
+            - name: serviceType
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: serviceSourceId
+              in: path
+              required: true
+              schema:
+                type: string
+          responses:
+            '200':
+              description: List of deadline reminders
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: communication-api
+  description: REST API for alerts, messages, and notifications
+  tags:
+    - rest
+    - alerts
+    - messages
+spec:
+  type: openapi
+  lifecycle: production
+  owner: group:ticketflow-team-3
+  system: ticketflow
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: Communication API
+      version: 1.0.0
+      description: API for alerts and messaging
+    servers:
+      - url: http://localhost:5148
+    paths:
+      /alerts:
+        get:
+          summary: Get recent alerts
+          parameters:
+            - name: onlyUnread
+              in: query
+              schema:
+                type: boolean
+                default: false
+          responses:
+            '200':
+              description: List of alerts (max 10)
+      /alerts/{alertId}:
+        put:
+          summary: Mark alert as read/unread
+          parameters:
+            - name: alertId
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: isRead
+              in: query
+              required: true
+              schema:
+                type: boolean
+          responses:
+            '200':
+              description: Alert updated
+      /logged-users/{userId}/messages:
+        get:
+          summary: Get messages for logged-in user
+          parameters:
+            - name: userId
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: onlyUnread
+              in: query
+              schema:
+                type: boolean
+            - name: page
+              in: query
+              schema:
+                type: integer
+            - name: limit
+              in: query
+              schema:
+                type: integer
+          responses:
+            '200':
+              description: List of messages
+      /anonymous-users/messages:
+        get:
+          summary: Get messages for anonymous users
+          parameters:
+            - name: onlyUnread
+              in: query
+              schema:
+                type: boolean
+            - name: page
+              in: query
+              schema:
+                type: integer
+            - name: limit
+              in: query
+              schema:
+                type: integer
+          responses:
+            '200':
+              description: List of messages
+      /messages/{messageId}:
+        put:
+          summary: Mark message as read/unread
+          parameters:
+            - name: messageId
+              in: path
+              required: true
+              schema:
+                type: string
+            - name: isRead
+              in: query
+              required: true
+              schema:
+                type: boolean
+          responses:
+            '200':
+              description: Message updated
+      /messages:
+        post:
+          summary: Create new message
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+          responses:
+            '201':
+              description: Message created
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: translations-api
+  description: REST API for text translation services
+  tags:
+    - rest
+    - translations
+    - i18n
+spec:
+  type: openapi
+  lifecycle: production
+  owner: group:ticketflow-team-2
+  system: ticketflow
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: Translations API
+      version: 1.0.0
+      description: API for text translation
+    servers:
+      - url: http://localhost:5200
+    paths:
+      /:
+        get:
+          summary: Health check
+          responses:
+            '200':
+              description: Service is healthy
+      /translations:
+        post:
+          summary: Request translation synchronously
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    text:
+                      type: string
+                    sourceLanguage:
+                      type: string
+                    targetLanguage:
+                      type: string
+          responses:
+            '200':
+              description: Translated text
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: system-metrics-api
+  description: SignalR hub for real-time system metrics streaming
+  tags:
+    - signalr
+    - websocket
+    - metrics
+    - realtime
+spec:
+  type: asyncapi
+  lifecycle: production
+  owner: group:ticketflow-team-2
+  system: ticketflow
+  definition: |
+    asyncapi: 2.6.0
+    info:
+      title: System Metrics API
+      version: 1.0.0
+      description: Real-time metrics streaming via SignalR
+    servers:
+      local:
+        url: ws://localhost:5231/live-metrics
+        protocol: ws
+    channels:
+      /live-metrics:
+        subscribe:
+          summary: Subscribe to real-time system metrics
+          message:
+            payload:
+              type: object
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                metrics:
+                  type: object

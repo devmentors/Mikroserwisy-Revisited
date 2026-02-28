@@ -1,0 +1,17 @@
+// Create migration for Tickets schema
+dotnet ef migrations add <name_of_migration> -o ./Data/Migrations/Tickets --startup-project ./../TicketFlow.Services.Tickets.Api/TicketFlow.Services.Tickets.Api.csproj --context TicketsDbContext
+
+// Apply migration for Tickets schema
+dotnet ef database update --startup-project ../TicketFlow.Services.Tickets.Api/TicketFlow.Services.Tickets.Api.csproj --context TicketsDbContext
+
+// Create migration for Deduplication schema
+dotnet ef migrations add <name_of_migration> -o ./Data/Migrations/Deduplication --startup-project ./../TicketFlow.Services.Tickets.Api/TicketFlow.Services.Tickets.Api.csproj --context DeduplicationDbContext
+
+// Apply migration for Deduplication schema
+dotnet ef database update --startup-project ../TicketFlow.Services.Tickets.Api/TicketFlow.Services.Tickets.Api.csproj --context DeduplicationDbContext
+
+// Create migration for Outbox schema
+dotnet ef migrations add <name_of_migration> -o ./Data/Migrations/Outbox --startup-project ./../TicketFlow.Services.Tickets.Api/TicketFlow.Services.Tickets.Api.csproj --context OutboxDbContext
+
+// Apply migration for Outbox schema
+dotnet ef database update --startup-project ../TicketFlow.Services.Tickets.Api/TicketFlow.Services.Tickets.Api.csproj --context OutboxDbContext

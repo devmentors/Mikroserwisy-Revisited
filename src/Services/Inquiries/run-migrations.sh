@@ -1,0 +1,1 @@
+dotnet ef database update --startup-project ./TicketFlow.Services.Inquiries.Api/TicketFlow.Services.Inquiries.Api.csproj --context InquiriesDbContext

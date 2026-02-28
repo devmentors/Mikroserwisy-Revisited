@@ -1,0 +1,30 @@
+@url = http://localhost:5011
+@email = user@test.com
+
+###
+GET {{url}}
+
+###
+POST {{url}}/inquiries/submit-sync
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "{{email}}",
+  "category": "general",
+  "title" : "Help",
+  "description": "Hi, got an issue:/"
+}
+
+###
+POST {{url}}/inquiries/submit
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "{{email}}",
+  "category": "general",
+  "title" : "Help",
+  "description": "Hi, got an issue:/"
+}
+

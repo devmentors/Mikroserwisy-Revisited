@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: system-metrics-service
+  description: Collects and broadcasts real-time system metrics via SignalR
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - dotnet
+    - api
+    - signalr
+    - rabbitmq
+  links:
+    - url: http://localhost:5231
+      title: API
+      icon: web
+    - url: ws://localhost:5231/live-metrics
+      title: SignalR Hub
+      icon: dashboard
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:ticketflow-team-2
+  system: ticketflow
+  providesApis:
+    - system-metrics-api

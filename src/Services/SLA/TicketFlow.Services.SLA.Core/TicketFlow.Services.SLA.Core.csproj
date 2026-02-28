@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Shared\TicketFlow.CourseUtils\TicketFlow.CourseUtils.csproj" />
+      <ProjectReference Include="..\..\Communication\TicketFlow.Services.Communication.Alerting\TicketFlow.Services.Communication.Alerting.csproj" />
+      <ProjectReference Include="..\..\..\Shared\TicketFlow.Shared\TicketFlow.Shared.csproj" />
+      <ProjectReference Include="..\..\SystemMetrics\TicketFlow.Services.SystemMetrics.Generator\TicketFlow.Services.SystemMetrics.Generator.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Data\Migrations\SLA\" />
+    </ItemGroup>
+
+</Project>

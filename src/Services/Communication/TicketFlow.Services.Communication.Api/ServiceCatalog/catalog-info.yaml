@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: communication-service
+  description: Handles messaging, alerts, and notifications
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - dotnet
+    - api
+    - rabbitmq
+  links:
+    - url: http://localhost:5148
+      title: API
+      icon: web
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-team-3
+  system: ticketflow
+  providesApis:
+    - communication-api
+  consumesApis:
+    - tickets-api
+  dependsOn:
+    - component:tickets-service

@@ -1,0 +1,691 @@
+{
+  "inquiries": [
+    {
+      "id": "1",
+      "title": "Problem z logowaniem do panelu administracyjnego",
+      "email": "admin@techfirm.pl",
+      "description": "Po aktualizacji systemu nie mogę uzyskać dostępu do panelu administratora",
+      "category": "technical",
+      "status": "new",
+      "createdAt": "2024-03-20T10:30:00.000Z"
+    },
+    {
+      "id": "2",
+      "title": "Błąd w generowaniu raportów PDF",
+      "email": "maria.wojcik@company.pl",
+      "description": "Raporty PDF zawierają nieprawidłowe dane w sekcji podsumowania",
+      "category": "technical",
+      "status": "in_progress",
+      "createdAt": "2024-03-19T15:45:00.000Z"
+    },
+    {
+      "id": "3",
+      "title": "Prośba o dodanie integracji z API",
+      "email": "dev.team@startup.com",
+      "description": "Potrzebujemy dodać integrację z zewnętrznym systemem płatności",
+      "category": "technical",
+      "status": "new",
+      "createdAt": "2024-03-18T09:15:00.000Z"
+    },
+    {
+      "id": "4",
+      "title": "Optymalizacja czasu ładowania strony",
+      "email": "performance.lead@corp.pl",
+      "description": "Strona główna ładuje się ponad 5 sekund na urządzeniach mobilnych",
+      "category": "technical",
+      "status": "in_progress",
+      "createdAt": "2024-03-17T14:20:00.000Z"
+    },
+    {
+      "id": "5",
+      "title": "Aktualizacja danych firmowych",
+      "email": "office@smallbusiness.pl",
+      "description": "Prosimy o zmianę adresu siedziby w profilu firmy",
+      "category": "general",
+      "status": "closed",
+      "createdAt": "2024-03-16T11:30:00.000Z"
+    }
+  ],
+  "tickets": [
+    {
+      "id": "1",
+      "title": "Problem z logowaniem do panelu administracyjnego",
+      "email": "admin@techfirm.pl",
+      "description": "Po aktualizacji systemu nie mogę uzyskać dostępu do panelu administratora",
+      "descriptionTranslated": "After the system update, I cannot access the administrator panel",
+      "category": "technical",
+      "status": "new",
+      "createdAt": "2024-03-20T10:30:00.000Z",
+      "deadline": "2024-03-20T22:00:00.000Z",
+      "severity": "high",
+      "employeeId": "2"
+    },
+    {
+      "id": "2",
+      "title": "Błąd w generowaniu raportów PDF",
+      "email": "maria.wojcik@company.pl",
+      "description": "Raporty PDF zawierają nieprawidłowe dane w sekcji podsumowania",
+      "descriptionTranslated": "PDF reports contain incorrect data in the summary section",
+      "category": "technical",
+      "status": "in_progress",
+      "createdAt": "2024-03-19T15:45:00.000Z",
+      "severity": "medium",
+      "employeeId": null
+    },
+    {
+      "id": "3",
+      "title": "Prośba o dodanie integracji z API",
+      "email": "dev.team@startup.com",
+      "description": "Potrzebujemy dodać integrację z zewnętrznym systemem płatności",
+      "descriptionTranslated": "We need to add integration with an external payment system",
+      "category": "technical",
+      "status": "new",
+      "createdAt": "2024-03-18T09:15:00.000Z",
+      "severity": "medium",
+      "employeeId": null,
+      "agentId": "00000000-0000-0000-0000-000000000002"
+    },
+    {
+      "id": "4",
+      "title": "Optymalizacja czasu ładowania strony",
+      "email": "performance.lead@corp.pl",
+      "description": "Strona główna ładuje się ponad 5 sekund na urządzeniach mobilnych",
+      "descriptionTranslated": "The homepage takes over 5 seconds to load on mobile devices",
+      "category": "technical",
+      "status": "in_progress",
+      "createdAt": "2024-03-17T14:20:00.000Z",
+      "deadline": "2024-03-19T14:20:00.000Z",
+      "severity": "medium",
+      "employeeId": "2"
+    },
+    {
+      "id": "5",
+      "title": "Aktualizacja danych firmowych",
+      "email": "office@smallbusiness.pl",
+      "description": "Prosimy o zmianę adresu siedziby w profilu firmy",
+      "descriptionTranslated": null,
+      "category": "general",
+      "status": "in_progress",
+      "createdAt": "2024-03-16T11:30:00.000Z",
+      "severity": "low",
+      "employeeId": "1"
+    }
+  ],
+  "employees": [
+    {
+      "id": "1",
+      "name": "Bogusław",
+      "surname": "Złotówa",
+      "position": "Supervisor",
+      "avatarUrl": "https://api.dicebear.com/9.x/notionists/svg?seed=Boguslaw&radius=50"
+    },
+    {
+      "id": "2",
+      "name": "Ziemowit",
+      "surname": "Pędziwiatr",
+      "position": "Agent",
+      "avatarUrl": "https://api.dicebear.com/9.x/notionists/svg?seed=Ziemowit&radius=50"
+    },
+    {
+      "id": "3",
+      "name": "Kunegunda",
+      "surname": "Śmieszek",
+      "position": "Agent",
+      "avatarUrl": "https://api.dicebear.com/9.x/notionists/svg?seed=Kunegunda&radius=50"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "message": "Nowy ticket #123 został przypisany do Ciebie",
+      "createdAt": "2024-03-20T14:30:00.000Z",
+      "isRead": false,
+      "type": "assignment"
+    },
+    {
+      "id": "2",
+      "message": "Deadline dla ticketu #456 za 2 godziny",
+      "createdAt": "2024-03-20T13:15:00.000Z",
+      "isRead": false,
+      "type": "deadline"
+    },
+    {
+      "id": "3",
+      "message": "Nowy ticket #789 został utworzony",
+      "createdAt": "2024-03-20T12:00:00.000Z",
+      "isRead": true,
+      "type": "new_ticket"
+    }
+  ],
+  "metrics": {
+    "services": [
+      {
+        "name": "Zgłoszenia",
+        "status": "healthy",
+        "lastChecked": "2024-03-20T10:00:00.000Z",
+        "metrics": {
+          "cpu": {
+            "usage": 45,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 45
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 42
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 47
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 44
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 46
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 43
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 45
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 48
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 44
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 46
+              }
+            ]
+          },
+          "memory": {
+            "used": 2048,
+            "total": 4096,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 2048
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 2156
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 2012
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 1986
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 2245
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 2167
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 2089
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 1956
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 2134
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 2078
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "Tickety",
+        "status": "healthy",
+        "lastChecked": "2024-03-20T10:00:00.000Z",
+        "metrics": {
+          "cpu": {
+            "usage": 38,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 38
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 35
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 39
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 36
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 37
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 40
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 38
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 35
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 37
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 39
+              }
+            ]
+          },
+          "memory": {
+            "used": 1536,
+            "total": 4096,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 1536
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 1498
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 1567
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 1523
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 1489
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 1545
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 1578
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 1534
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 1512
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 1490
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "Tłumaczenia",
+        "status": "error",
+        "lastChecked": "2024-03-20T10:00:00.000Z",
+        "metrics": {
+          "cpu": {
+            "usage": 92,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 92
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 88
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 85
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 90
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 87
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 89
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 86
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 91
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 88
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 86
+              }
+            ]
+          },
+          "memory": {
+            "used": 3584,
+            "total": 4096,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 3584
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 3498
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 3612
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 3567
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 3489
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 3523
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 3478
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 3534
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 3589
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 3512
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "SLA",
+        "status": "healthy",
+        "lastChecked": "2024-03-20T10:00:00.000Z",
+        "metrics": {
+          "cpu": {
+            "usage": 25,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 25
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 23
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 26
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 24
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 27
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 25
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 22
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 24
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 26
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 23
+              }
+            ]
+          },
+          "memory": {
+            "used": 1024,
+            "total": 4096,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 1024
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 1056
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 1012
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 1078
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 1045
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 1034
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 1067
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 1023
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 1089
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 1045
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "Komunikacja",
+        "status": "unknown",
+        "lastChecked": "2024-03-20T10:00:00.000Z",
+        "metrics": null
+      },
+      {
+        "name": "Metryki systemowe",
+        "status": "healthy",
+        "lastChecked": "2024-03-20T10:00:00.000Z",
+        "metrics": {
+          "cpu": {
+            "usage": 32,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 32
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 30
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 33
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 31
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 34
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 32
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 29
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 31
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 33
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 30
+              }
+            ]
+          },
+          "memory": {
+            "used": 1280,
+            "total": 4096,
+            "history": [
+              {
+                "timestamp": "2024-03-20T10:00:00.000Z",
+                "value": 1280
+              },
+              {
+                "timestamp": "2024-03-20T09:50:00.000Z",
+                "value": 1312
+              },
+              {
+                "timestamp": "2024-03-20T09:40:00.000Z",
+                "value": 1289
+              },
+              {
+                "timestamp": "2024-03-20T09:30:00.000Z",
+                "value": 1267
+              },
+              {
+                "timestamp": "2024-03-20T09:20:00.000Z",
+                "value": 1298
+              },
+              {
+                "timestamp": "2024-03-20T09:10:00.000Z",
+                "value": 1278
+              },
+              {
+                "timestamp": "2024-03-20T09:00:00.000Z",
+                "value": 1256
+              },
+              {
+                "timestamp": "2024-03-20T08:50:00.000Z",
+                "value": 1287
+              },
+              {
+                "timestamp": "2024-03-20T08:40:00.000Z",
+                "value": 1301
+              },
+              {
+                "timestamp": "2024-03-20T08:30:00.000Z",
+                "value": 1276
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "messages": [
+    {
+      "id": "1",
+      "title": "Problem z logowaniem",
+      "preview": "Dzień dobry, mam problem z zalogowaniem się do systemu...",
+      "content": "Dzień dobry, mam problem z zalogowaniem się do systemu. Po wpisaniu poprawnych danych system wyświetla błąd 'Nieprawidłowe dane'. Proszę o pomoc w rozwiązaniu problemu.",
+      "senderDisplayName": "Bogusław Złotówa",
+      "senderEmployeeId": "00000000-0000-0000-0000-000000000001",
+      "timestamp": "2024-03-21T10:30:00.000Z",
+      "isUnread": true
+    },
+    {
+      "id": "2",
+      "title": "Aktualizacja statusu zgłoszenia #123",
+      "preview": "Twoje zgłoszenie zostało zaktualizowane. Nasz zespół techniczny...",
+      "content": "Twoje zgłoszenie zostało zaktualizowane. Nasz zespół techniczny rozpoczął pracę nad rozwiązaniem zgłoszonego problemu. Będziemy informować o postępach.",
+      "senderDisplayName": "System",
+      "timestamp": "2024-03-21T09:15:00.000Z",
+      "isUnread": true
+    },
+    {
+      "id": "3",
+      "title": "RE: Pytanie o fakturę",
+      "preview": "Dziękujemy za kontakt. Faktura została wysłana ponownie na wskazany adres email...",
+      "content": "Dziękujemy za kontakt. Faktura została wysłana ponownie na wskazany adres email. Proszę sprawdzić również folder SPAM. W razie dalszych problemów prosimy o kontakt.",
+      "senderDisplayName": "Ziemowit Pędziwiatr",
+      "senderEmployeeId": "00000000-0000-0000-0000-000000000002",
+      "timestamp": "2024-03-20T15:45:00.000Z",
+      "isUnread": true
+    }
+  ]
+}

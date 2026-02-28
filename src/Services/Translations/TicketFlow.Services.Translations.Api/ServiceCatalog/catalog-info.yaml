@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: translations-service
+  description: Provides translation services for multi-language support
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - dotnet
+    - api
+  links:
+    - url: http://localhost:5274
+      title: API
+      icon: web
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-team-2
+  system: ticketflow
+  providesApis:
+    - translations-api

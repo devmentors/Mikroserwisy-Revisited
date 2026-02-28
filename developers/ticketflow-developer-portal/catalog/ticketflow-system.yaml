@@ -1,0 +1,101 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: ticketflow
+  description: TicketFlow - Microservices-based ticket management system
+  tags:
+    - microservices
+    - dotnet
+    - rabbitmq
+spec:
+  owner: group:ticketflow-team-1
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ticketflow-team-1
+  description: Core Ticketing Team - Inquiries & Tickets
+spec:
+  type: team
+  children: []
+  members:
+    - jan.kowalski
+    - anna.nowak
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ticketflow-team-2
+  description: Platform Team - Translations & System Metrics
+spec:
+  type: team
+  children: []
+  members:
+    - piotr.wisniewski
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ticketflow-team-3
+  description: Operations Team - SLA & Communication
+spec:
+  type: team
+  children: []
+  members:
+    - maria.zielinska
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: jan.kowalski
+  description: Tech Lead
+spec:
+  profile:
+    displayName: Jan Kowalski
+    email: jan.kowalski@ticketflow.com
+  memberOf:
+    - ticketflow-team-1
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: anna.nowak
+  description: Senior Developer
+spec:
+  profile:
+    displayName: Anna Nowak
+    email: anna.nowak@ticketflow.com
+  memberOf:
+    - ticketflow-team-1
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: piotr.wisniewski
+  description: Platform Engineer
+spec:
+  profile:
+    displayName: Piotr Wisniewski
+    email: piotr.wisniewski@ticketflow.com
+  memberOf:
+    - ticketflow-team-2
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: maria.zielinska
+  description: DevOps Engineer
+spec:
+  profile:
+    displayName: Maria Zielinska
+    email: maria.zielinska@ticketflow.com
+  memberOf:
+    - ticketflow-team-3

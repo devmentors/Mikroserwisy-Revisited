@@ -1,0 +1,10 @@
+@url = http://localhost:5274
+
+
+###
+POST {{url}}/translations/
+Content-Type: application/json
+
+{
+  "Text": "Text description"
+}

@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS base
+WORKDIR /app
+EXPOSE 8080
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
+WORKDIR /src
+COPY ["src/Services/PersonalInfoVault/TicketFlow.Services.PersonalInfoVault.Api/TicketFlow.Services.PersonalInfoVault.Api.csproj", "src/Services/PersonalInfoVault/TicketFlow.Services.PersonalInfoVault.Api/"]
+COPY ["src/Services/PersonalInfoVault/TicketFlow.Services.PersonalInfoVault.Core/TicketFlow.Services.PersonalInfoVault.Core.csproj", "src/Services/PersonalInfoVault/TicketFlow.Services.PersonalInfoVault.Core/"]
+COPY ["src/Shared/TicketFlow.Shared/TicketFlow.Shared.csproj", "src/Shared/TicketFlow.Shared/"]
+COPY ["src/Shared/TicketFlow.Shared.Contracts/TicketFlow.Shared.Contracts.csproj", "src/Shared/TicketFlow.Shared.Contracts/"]
+COPY ["src/Shared/TicketFlow.CourseUtils/TicketFlow.CourseUtils.csproj", "src/Shared/TicketFlow.CourseUtils/"]
+COPY ["src/Services/SystemMetrics/TicketFlow.Services.SystemMetrics.Generator/TicketFlow.Services.SystemMetrics.Generator.csproj", "src/Services/SystemMetrics/TicketFlow.Services.SystemMetrics.Generator/"]
+RUN dotnet restore "src/Services/PersonalInfoVault/TicketFlow.Services.PersonalInfoVault.Api/TicketFlow.Services.PersonalInfoVault.Api.csproj"
+COPY . .
+WORKDIR "/src/src/Services/PersonalInfoVault/TicketFlow.Services.PersonalInfoVault.Api"
+RUN dotnet build -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "TicketFlow.Services.PersonalInfoVault.Api.dll"]

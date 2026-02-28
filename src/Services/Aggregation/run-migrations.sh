@@ -1,0 +1,1 @@
+dotnet ef database update --startup-project ./TicketFlow.Services.Aggregation.Api/TicketFlow.Services.Aggregation.Api.csproj --project ./TicketFlow.Services.Aggregation.Core/TicketFlow.Services.Aggregation.Core.csproj --context AggregationDbContext

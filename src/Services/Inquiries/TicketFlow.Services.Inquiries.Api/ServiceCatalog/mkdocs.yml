@@ -1,0 +1,9 @@
+site_name: Inquiries Service
+site_description: Documentation for Inquiries Service
+docs_dir: docs
+nav:
+  - Home: index.md
+  - API: api.md
+  - Architecture: architecture.md
+plugins:
+  - techdocs-core

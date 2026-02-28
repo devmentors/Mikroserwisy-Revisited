@@ -1,0 +1,5 @@
+// Create migration for Inquiries schema
+dotnet ef migrations add <name_of_migration> -o ./Data/Migrations --startup-project ./../TicketFlow.Services.Inquiries.Api/TicketFlow.Services.Inquiries.Api.csproj --context InquiriesDbContext
+
+// Apply migration for Inquiries schema
+dotnet ef database update --startup-project ../TicketFlow.Services.Inquiries.Api/TicketFlow.Services.Inquiries.Api.csproj --context InquiriesDbContext

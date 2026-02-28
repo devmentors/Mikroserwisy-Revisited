@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sla-service
+  description: Monitors and enforces SLA compliance for tickets
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - dotnet
+    - api
+    - rabbitmq
+  links:
+    - url: http://localhost:5054
+      title: API
+      icon: web
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-team-3
+  system: ticketflow
+  providesApis:
+    - sla-api
+  consumesApis:
+    - tickets-api
+    - communication-api
+  dependsOn:
+    - component:tickets-service
+    - component:communication-service

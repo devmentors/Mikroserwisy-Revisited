@@ -1,0 +1,4 @@
+﻿@ticketId = e54758ed-ec86-46d3-abe3-9ea5d4c99122
+@ticketType = QuestionTicket
+
+GET http://localhost:5054/sla/{{ticketType}}/{{ticketId}}/deadline-reminders

@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: inquiries-service
+  description: Handles customer inquiries and their lifecycle
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - dotnet
+    - api
+    - rabbitmq
+  links:
+    - url: http://localhost:5011
+      title: API
+      icon: web
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-team-1
+  system: ticketflow
+  providesApis:
+    - inquiries-api
+  consumesApis:
+    - translations-api
+  dependsOn:
+    - component:translations-service

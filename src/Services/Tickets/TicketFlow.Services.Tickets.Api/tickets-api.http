@@ -1,0 +1,37 @@
+@url = http://localhost:5112
+@ticketId = 15e663da-d2e3-41db-a3ab-5760b9bbeff8
+@agentId = 00000000-0000-0000-0000-000000000001
+
+###
+GET {{url}}
+
+###
+POST {{url}}/tickets/{{ticketId}}/qualify
+Content-Type: application/json
+
+{
+  "TicketType": 1
+}
+
+###
+POST {{url}}/tickets/{{ticketId}}/assign/{{agentId}}
+Content-Type: application/json
+
+{
+}
+
+###
+PUT {{url}}/tickets/{{ticketId}}
+Content-Type: application/json
+
+{
+  "Notes": "This is note",
+  "InternalNotes": "This is internal note"
+}
+
+###
+POST {{url}}/tickets/{{ticketId}}/resolve/resolution
+Content-Type: application/json
+
+{
+}

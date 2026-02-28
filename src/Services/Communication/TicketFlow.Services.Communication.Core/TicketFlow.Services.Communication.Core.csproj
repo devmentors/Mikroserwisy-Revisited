@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Shared\TicketFlow.Shared\TicketFlow.Shared.csproj" />
+      <ProjectReference Include="..\..\SystemMetrics\TicketFlow.Services.SystemMetrics.Generator\TicketFlow.Services.SystemMetrics.Generator.csproj" />
+      <ProjectReference Include="..\TicketFlow.Services.Communication.Alerting\TicketFlow.Services.Communication.Alerting.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Data\Migrations\Communication\" />
+    </ItemGroup>
+
+</Project>
