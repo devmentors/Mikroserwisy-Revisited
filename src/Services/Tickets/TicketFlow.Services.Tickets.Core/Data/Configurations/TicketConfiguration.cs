@@ -9,6 +9,7 @@ internal sealed class TicketConfiguration : IEntityTypeConfiguration<Ticket>
     public void Configure(EntityTypeBuilder<Ticket> builder)
     {
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.UserId).IsRequired(false);
         builder.Property(x => x.PersonToken).IsRequired().HasMaxLength(100);
         builder.HasIndex(x => x.PersonToken);
         builder.Property(x => x.Description).IsRequired();

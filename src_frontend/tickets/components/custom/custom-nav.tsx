@@ -101,6 +101,13 @@ export function CustomNavigationMenu() {
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
+            <NavigationMenuItem className="pr-2">
+              <Link href="http://localhost:21200" legacyBehavior passHref>
+                <NavigationMenuLink className={menuItemStyle}>
+                  Chatbot
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
       </div>

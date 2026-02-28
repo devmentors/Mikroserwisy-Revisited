@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using TicketFlow.Services.Anonymization.Core;
 using TicketFlow.Services.Anonymization.Core.Commands.CreateAnonymizationRequest;
 using TicketFlow.Services.Anonymization.Core.DTOs;
+using TicketFlow.Services.Anonymization.Core.Http;
 using TicketFlow.Services.Anonymization.Core.Queries;
 using TicketFlow.Shared.AspNetCore;
 using TicketFlow.Shared.Commands;
-using TicketFlow.Shared.Exceptions;
 using TicketFlow.Shared.Metrics;
 using TicketFlow.Shared.Queries;
 
@@ -17,7 +17,6 @@ builder.Services
 
 var app = builder.Build();
 
-app.UseExceptions();
 app.UseMetrics();
 
 app.MapGet("/", () => "Anonymization Service - GDPR Data Removal Orchestration");
@@ -42,15 +41,34 @@ app.MapGet("/anonymization-requests/{id:guid}", async (
 app.MapPost("/anonymization-requests", async (
     [FromBody] CreateAnonymizationRequestInput input,
     [FromServices] ICommandHandler<CreateAnonymizationRequest> handler,
+    [FromServices] IPersonalInfoVaultClient vaultClient,
     CancellationToken cancellationToken) =>
 {
+    var personToken = input.PersonToken;
+
+    // Resolve personToken from email if needed
+    if (string.IsNullOrEmpty(personToken) && !string.IsNullOrEmpty(input.Email))
+    {
+        personToken = await vaultClient.GetPersonTokenByEmailAsync(input.Email, cancellationToken);
+        if (string.IsNullOrEmpty(personToken))
+        {
+            return Results.NotFound(new { Message = "No person found with this email" });
+        }
+    }
+
+    if (string.IsNullOrEmpty(personToken))
+    {
+        return Results.BadRequest(new { Message = "Either PersonToken or Email must be provided" });
+    }
+
     var requestId = Guid.NewGuid();
-    var command = new CreateAnonymizationRequest(requestId, input.PersonToken, input.Email, input.RequestedByEmail);
+    var command = new CreateAnonymizationRequest(requestId, personToken, input.RequestedByEmail);
     await handler.HandleAsync(command, cancellationToken);
 
     return Results.Created($"/anonymization-requests/{requestId}", new
     {
         Id = requestId,
+        PersonToken = personToken,
         Status = "InProgress"
     });
 });

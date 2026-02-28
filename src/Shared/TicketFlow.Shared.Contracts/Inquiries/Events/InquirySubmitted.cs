@@ -4,6 +4,7 @@ namespace TicketFlow.Shared.Contracts.Inquiries.Events;
 
 public sealed record InquirySubmitted(
     Guid Id,
+    Guid? UserId,
     string PersonToken,
     string Title,
     string Description,

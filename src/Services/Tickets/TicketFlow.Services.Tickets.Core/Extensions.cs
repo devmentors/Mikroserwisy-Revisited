@@ -54,6 +54,9 @@ public static class Extensions
         services.AddHostedService<TicketsTopologyInitializer>();
         services.AddTransient<ITicketsRepository, TicketsRepository>();
 
+        // Register rebalance service for automatic ticket assignment
+        services.AddScoped<Services.RebalanceService>();
+
         var vaultUrl = configuration["Services:PersonalInfoVault"] ?? "http://localhost:6100";
         services.AddHttpClient<IPersonalInfoVaultClient, PersonalInfoVaultClient>(client =>
         {

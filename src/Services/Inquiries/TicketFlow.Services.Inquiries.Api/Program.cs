@@ -28,25 +28,31 @@ app.MapGet("/test-error", () => Results.StatusCode(500));
 app.MapGet("/inquiries", async (
     [FromQuery] int page,
     [FromQuery] int limit,
+    [FromHeader(Name = "X-User-Id")] Guid? userId,
     [FromServices] IQueryHandler<ListInquiries, InquiriesListDto> handler,
-    CancellationToken cancellationToken) 
-    => Results.Ok((object?)await handler.HandleAsync(new(page, limit), cancellationToken)));
+    CancellationToken cancellationToken)
+    => Results.Ok((object?)await handler.HandleAsync(new(page, limit, userId), cancellationToken)));
 
 app.MapPost("/inquiries/submit", async (
-    [FromBody] SubmitInquiry command, 
+    [FromBody] SubmitInquiry command,
+    [FromHeader(Name = "X-User-Id")] Guid? userId,
     [FromServices] ICommandHandler<SubmitInquirySynchronously> synchronousHandler,
     [FromServices] ICommandHandler<SubmitInquiry> handler,
     CancellationToken cancellationToken) =>
 {
+    // Use userId from header, override if present in command
+    var effectiveUserId = userId ?? command.UserId;
+
     if (FeatureFlags.UseSynchronousIntegration)
     {
-        var synchronousCommand = new SubmitInquirySynchronously(command.Name, command.Email, command.Title, command.Description, command.Category);
+        var synchronousCommand = new SubmitInquirySynchronously(effectiveUserId, command.Name, command.Email, command.Title, command.Description, command.Category);
         await synchronousHandler.HandleAsync(synchronousCommand);
         return Results.Ok();
     }
     else
     {
-        await handler.HandleAsync(command, cancellationToken);
+        var commandWithUserId = command with { UserId = effectiveUserId };
+        await handler.HandleAsync(commandWithUserId, cancellationToken);
         return Results.Ok();
     }
 });

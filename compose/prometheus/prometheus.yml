@@ -2,6 +2,9 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+rule_files:
+  - /etc/prometheus/alerts/*.yml
+
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
@@ -60,4 +63,39 @@ scrape_configs:
   - job_name: 'ticketflow-anonymization'
     static_configs:
       - targets: ['host.docker.internal:6200']
+    metrics_path: /metrics
+
+  # AI/LLM Infrastructure
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['host.docker.internal:11434']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # AI Agents
+  - job_name: 'ticketflow-agents-escalation'
+    static_configs:
+      - targets: ['host.docker.internal:8104']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-agents-knowledgebase'
+    static_configs:
+      - targets: ['host.docker.internal:8106']
+    metrics_path: /metrics
+
+  # ChatBot Agent (AG-UI)
+  - job_name: 'ticketflow-agents-chatbot'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+    metrics_path: /metrics
+
+  # MCP Servers
+  - job_name: 'ticketflow-mcp-tickets'
+    static_configs:
+      - targets: ['host.docker.internal:5401']
+    metrics_path: /metrics
+
+  - job_name: 'ticketflow-mcp-inquiries'
+    static_configs:
+      - targets: ['host.docker.internal:5501']
     metrics_path: /metrics

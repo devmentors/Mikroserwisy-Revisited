@@ -5,8 +5,8 @@ export interface Ticket {
   title: string;
   email: string;
   status: TicketStatus;
-  createdAt: Date;
-  deadline: Date | null;
+  createdAt: string;
+  deadline: string | null;
   description: string;
   descriptionTranslated: string | null;
   severityLevel?: SeverityLevel | null;
@@ -14,4 +14,8 @@ export interface Ticket {
   type: TicketType;
   agentId?: string | null;
   resolution?: string | null;
+  queuePosition?: number | null;
+  escalatedToSupervisor?: boolean;
+  escalationReason?: string | null;
+  escalatedAt?: string | null;
 }

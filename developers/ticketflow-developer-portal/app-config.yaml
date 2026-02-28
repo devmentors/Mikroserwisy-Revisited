@@ -104,6 +104,18 @@ catalog:
     - type: file
       target: ../../../../src/Services/SystemMetrics/TicketFlow.Services.SystemMetrics.Api/ServiceCatalog/catalog-info.yaml
 
+    # AI Agents
+    - type: file
+      target: ../../../../src/Agents/TicketFlow.Agents.ChatBot/ServiceCatalog/catalog-info.yaml
+    - type: file
+      target: ../../../../src/Agents/TicketFlow.Agents.Escalation/ServiceCatalog/catalog-info.yaml
+
+    # MCP Servers
+    - type: file
+      target: ../../../../src/Services/Inquiries/TicketFlow.Services.Inquiries.McpServer/ServiceCatalog/catalog-info.yaml
+    - type: file
+      target: ../../../../src/Services/Tickets/TicketFlow.Services.Tickets.McpServer/ServiceCatalog/catalog-info.yaml
+
 kubernetes:
   # see https://backstage.io/docs/features/kubernetes/configuration for kubernetes configuration options
 

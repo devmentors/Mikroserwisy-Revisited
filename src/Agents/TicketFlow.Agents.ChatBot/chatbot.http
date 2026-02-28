@@ -1,0 +1,13 @@
+@url = http://localhost:8000
+
+### Lista dostępnych narzędzi - rola: client
+GET {{url}}/tools
+X-User-Role: client
+
+### Lista dostępnych narzędzi - rola: agent
+GET {{url}}/tools
+X-User-Role: agent
+
+### Lista dostępnych narzędzi - rola: supervisor
+GET {{url}}/tools
+X-User-Role: supervisor

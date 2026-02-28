@@ -82,28 +82,36 @@ app.MapGet("/logged-users/{userId}/messages/", async (
 
 app.MapGet("/anonymous-users/messages/", async (
     [FromServices] CommunicationDbContext dbContext,
+    [FromHeader(Name = "X-User-Id")] Guid? userId,
     [FromQuery] bool onlyUnread = false,
     [FromQuery] int page = 1,
     [FromQuery] int limit = 10,
     CancellationToken cancellationToken = default) =>
 {
-    var dbQuery = dbContext.Messages
-        .AsQueryable()
-        .Where(x => x.RecipentUserId == null); // Recipient UserId == null -> anonymous user from Inquiries
-    
+    var dbQuery = dbContext.Messages.AsQueryable();
+
+    if (userId.HasValue)
+    {
+        dbQuery = dbQuery.Where(x => x.RecipentUserId == userId.Value);
+    }
+    else
+    {
+        dbQuery = dbQuery.Where(x => x.RecipentUserId == null);
+    }
+
     if (onlyUnread)
     {
         dbQuery = dbQuery.Where(x => !x.IsRead);
     }
-    
+
     var total = await dbQuery.CountAsync(cancellationToken);
-    
+
     var data = await dbQuery
         .OrderByDescending(x => x.Timestamp)
         .Skip((page - 1) * limit)
         .Take(limit)
         .ToListAsync(cancellationToken);
-    
+
     return new MessageListDto(data, total);
 });
 

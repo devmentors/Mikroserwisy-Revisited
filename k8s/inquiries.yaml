@@ -43,6 +43,4 @@ spec:
               value: "http://tickets-service"
             - name: Services__Translations__Url
               value: "http://translations-service"
-            - name: Services__PersonalInfoVault__Url
-              value: "http://personalinfovault-service"
           

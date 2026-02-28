@@ -99,3 +99,15 @@ spec:
     email: maria.zielinska@ticketflow.com
   memberOf:
     - ticketflow-team-3
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ticketflow-ai-team
+  description: AI & Agents Team
+spec:
+  type: team
+  children: []
+  members:
+    - jan.kowalski

@@ -7,5 +7,6 @@ public enum TicketStatus : byte
     BeforeQualification = 2,
     Qualified = 3,
     Resolved = 4,
-    Blocked = 5
+    Blocked = 5,
+    WaitingForCapacity = 6  // Ticket in queue waiting for agent capacity
 }

@@ -1,0 +1,67 @@
+@url = http://localhost:5401
+
+### MCP Card - manifest serwera
+GET {{url}}/mcp/card
+
+### Lista narzędzi - rola: agent (7 narzędzi)
+POST {{url}}/
+Content-Type: application/json
+X-User-Role: agent
+
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "tools/list"
+}
+
+### Lista narzędzi - rola: supervisor (10 narzędzi)
+POST {{url}}/
+Content-Type: application/json
+X-User-Role: supervisor
+
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "tools/list"
+}
+
+### Lista narzędzi - rola: escalation_agent (10 narzędzi)
+POST {{url}}/
+Content-Type: application/json
+X-User-Role: escalation_agent
+
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "tools/list"
+}
+
+### Wywołanie narzędzia: list_tickets_good
+POST {{url}}/
+Content-Type: application/json
+X-User-Role: supervisor
+
+{
+  "jsonrpc": "2.0",
+  "id": "2",
+  "method": "tools/call",
+  "params": {
+    "name": "list_tickets_good",
+    "arguments": {}
+  }
+}
+
+### Wywołanie narzędzia: list_tickets_bad (anty-wzorzec)
+POST {{url}}/
+Content-Type: application/json
+X-User-Role: supervisor
+
+{
+  "jsonrpc": "2.0",
+  "id": "3",
+  "method": "tools/call",
+  "params": {
+    "name": "list_tickets_bad",
+    "arguments": {}
+  }
+}

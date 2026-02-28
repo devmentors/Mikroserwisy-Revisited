@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: tickets-mcp-server
+  description: MCP Server exposing ticket operations as AI tools
+  tags:
+    - dotnet
+    - mcp-server
+    - ai-tools
+    - rbac
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-ai-team
+  system: ticketflow
+  dependsOn:
+    - component:tickets-service

@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: inquiries-mcp-server
+  description: MCP Server exposing inquiry operations as AI tools
+  tags:
+    - dotnet
+    - mcp-server
+    - ai-tools
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-ai-team
+  system: ticketflow
+  dependsOn:
+    - component:inquiries-service

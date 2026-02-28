@@ -1,8 +1,11 @@
 ﻿namespace TicketFlow.Services.Tickets.Core.Queries.ListAgents;
 
 public record AgentDto(
-    string Id,
+    Guid Id,
     string UserId,
     string FullName,
     string Position,
-    string AvatarUrl);
+    string AvatarUrl,
+    int AssignedTicketCount,
+    int MaxTickets,
+    string[] Specializations);

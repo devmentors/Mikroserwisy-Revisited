@@ -6,8 +6,10 @@ using TicketFlow.Services.Tickets.Core.Commands.AssignAgentToTicket;
 using TicketFlow.Services.Tickets.Core.Commands.BlockTicket;
 using TicketFlow.Services.Tickets.Core.Commands.QualifyTicket;
 using TicketFlow.Services.Tickets.Core.Commands.ResolveTicket;
+using TicketFlow.Services.Tickets.Core.Commands.SetTicketWaiting;
 using TicketFlow.Services.Tickets.Core.Commands.UnblockTicket;
 using TicketFlow.Services.Tickets.Core.Data.Models;
+using TicketFlow.Services.Tickets.Core.Data.Repositories;
 using TicketFlow.Services.Tickets.Core.Queries.GetClientNotesForTicket;
 using TicketFlow.Services.Tickets.Core.Queries.GetTicketDetails;
 using TicketFlow.Services.Tickets.Core.Queries.ListAgents;
@@ -136,7 +138,8 @@ app.MapGet("/agents/{id}", async (
 {
     //We have only 3 agents in system, so it's cheaper to just reuse fetching them all
     var allAgents = await handler.HandleAsync(new ListAgentsQuery(), cancellationToken);
-    return allAgents.SingleOrDefault(x => x.Id.Equals(id, StringComparison.InvariantCultureIgnoreCase));
+    if (!Guid.TryParse(id, out var guidId)) return null;
+    return allAgents.SingleOrDefault(x => x.Id == guidId);
 });
 
 app.MapGet("/users/{id}", async (
@@ -163,7 +166,38 @@ app.MapPost("/tickets/by-tokens", async (
     return Results.Ok(result);
 });
 
+app.MapPost("/tickets/{id}/waiting", async (
+    [FromRoute] Guid id,
+    [FromBody] SetWaitingRequest request,
+    [FromServices] ICommandHandler<SetTicketWaiting> handler,
+    [FromServices] ITicketsRepository repository,
+    CancellationToken cancellationToken) =>
+{
+    try
+    {
+        var command = new SetTicketWaiting(id, request.Reason);
+        await handler.HandleAsync(command, cancellationToken);
+
+        // Query ticket to get the queue position that was set
+        var ticket = await repository.GetAsync(id, cancellationToken);
+        var position = ticket?.QueuePosition ?? 1;
+
+        return Results.Ok(new
+        {
+            success = true,
+            queuePosition = position,
+            message = $"Ticket moved to waiting queue at position {position}"
+        });
+    }
+    catch (TicketFlowException ex)
+    {
+        return Results.NotFound(new { success = false, message = ex.Message });
+    }
+});
+
 app.UseExceptions();
 app.Run();
 
 public record FilterByTokensRequest(List<string> Tokens);
+
+public record SetWaitingRequest(string? Reason);

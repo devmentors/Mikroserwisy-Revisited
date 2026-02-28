@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TicketFlow.Services.Inquiries.Core.Data;
 using TicketFlow.Services.Inquiries.Core.Data.Repositories;
-using TicketFlow.Services.Inquiries.Core.Initializers;
 using TicketFlow.Services.Inquiries.Core.Http;
 using TicketFlow.Services.Inquiries.Core.LanguageDetection;
 using TicketFlow.Services.Inquiries.Core.Messaging;
@@ -49,7 +48,6 @@ public static class Extensions
             .AddMetrics(configuration)
             .AddObservability(configuration);
 
-        services.AddHostedService<DbInitializer>();
         services.AddHostedService<InquiriesConsumerService>();
         services.AddHostedService<InquiriesTopologyInitializer>();
 

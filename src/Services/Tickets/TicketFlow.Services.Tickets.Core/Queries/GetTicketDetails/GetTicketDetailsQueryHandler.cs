@@ -24,8 +24,12 @@ public class GetTicketDetailsQueryHandler(
 
             return new TicketDetailsDto(
                 result.Id.ToString(),
+                result.UserId,
+                result.Title,
+                result.Description,
                 pii?.Email ?? "Unknown",
                 result.Status.ToString(),
+                result.Category.ToString(),
                 result.CreatedAt,
                 result.Severity,
                 result.AssignedAgent?.UserId,

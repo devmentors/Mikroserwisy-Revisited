@@ -1,0 +1,11 @@
+{
+  "extends": "./node_modules/gts/",
+  "overrides": [
+    {
+      "files": ["tests/**/*.ts", "vitest.config.ts"],
+      "rules": {
+        "n/no-unpublished-import": "off"
+      }
+    }
+  ]
+}

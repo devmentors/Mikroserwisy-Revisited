@@ -39,6 +39,4 @@ spec:
                   key: tickets-connection-string
             - name: rabbitMq__hostName
               value: "rabbitmq-service"
-            - name: Services__PersonalInfoVault
-              value: "http://personalinfovault-service"
           

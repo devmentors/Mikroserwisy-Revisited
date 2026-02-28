@@ -21,10 +21,12 @@ internal sealed class ResolveTicketHandler(ITicketsRepository repository, IMessa
             throw new TicketFlowException($"Ticket with id {command.TicketId} was not found.");
         }
 
+        var oldStatus = ticket.Status.ToString();
         ticket.Resolve(command.Resolution);
         await repository.UpdateAsync(ticket, cancellationToken);
-        
+
         await PublishTicketResolved(command, cancellationToken, ticket);
+        await PublishTicketStatusChanged(ticket, oldStatus, cancellationToken);
         logger.LogInformation($"Ticket with id {ticket.Id} has been resolved.");
     }
 
@@ -32,8 +34,21 @@ internal sealed class ResolveTicketHandler(ITicketsRepository repository, IMessa
     {
         var ticketStatusChanged = new TicketResolved(command.TicketId, ticket.Version);
         await publisher.PublishAsync(
-            message: ticketStatusChanged, 
-            routingKey: "ticket-resolved", 
+            message: ticketStatusChanged,
+            routingKey: "ticket-resolved",
+            cancellationToken: cancellationToken);
+    }
+
+    private async Task PublishTicketStatusChanged(Ticket ticket, string oldStatus, CancellationToken cancellationToken)
+    {
+        var ticketStatusChangedEvent = new TicketFlow.Services.Tickets.Core.Messaging.Publishing.TicketStatusChanged(
+            ticket.Id,
+            oldStatus,
+            ticket.Status.ToString(),
+            ticket.AssignedTo);
+        await publisher.PublishAsync(
+            message: ticketStatusChangedEvent,
+            routingKey: "ticket-status-changed",
             cancellationToken: cancellationToken);
     }
 }

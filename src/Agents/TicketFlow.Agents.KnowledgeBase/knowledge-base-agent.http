@@ -1,0 +1,25 @@
+@url = http://localhost:8106
+
+### Agent Card - manifest agenta A2A
+GET {{url}}/.well-known/agent-card.json
+
+### A2A - zapytanie do bazy wiedzy
+POST {{url}}/a2a
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": "test-1",
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "kind": "text",
+          "text": "Jak zresetować hasło?"
+        }
+      ]
+    }
+  }
+}

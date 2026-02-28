@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: knowledge-base-agent
+  description: AI agent for knowledge base search with autonomous FAQ and ticket history lookup
+  tags:
+    - dotnet
+    - ai-agent
+    - a2a
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-ai-team
+  system: ticketflow
+  dependsOn:
+    - component:tickets-mcp-server

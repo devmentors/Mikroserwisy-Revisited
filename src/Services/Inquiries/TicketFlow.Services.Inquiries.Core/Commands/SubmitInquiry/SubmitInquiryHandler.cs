@@ -15,11 +15,11 @@ internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILan
     private const string EnglishLanguageCode = "en";
     public async Task HandleAsync(SubmitInquiry command, CancellationToken cancellationToken = default)
     {
-        var (name, email, title, description, category) = command;
+        var (userId, name, email, title, description, category) = command;
         var categoryParsed = ParseCategory(category);
 
         var personToken = await vaultClient.StorePersonalInfoAsync(name, email, cancellationToken);
-        var inquiry = new Inquiry(personToken, title, description, categoryParsed);
+        var inquiry = new Inquiry(userId, personToken, title, description, categoryParsed);
 
         await repository.AddAsync(inquiry, cancellationToken);
         var languageCode = await languageDetector.GetTextLanguageCode(inquiry.Description, cancellationToken);
@@ -28,6 +28,7 @@ internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILan
         {
             var inquiryReportedMessage = new Shared.Contracts.Inquiries.Events.InquirySubmitted(
                 inquiry.Id,
+                inquiry.UserId,
                 inquiry.PersonToken,
                 inquiry.Title,
                 inquiry.Description,
@@ -40,6 +41,7 @@ internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILan
         {
             var inquiryReportedMessage = new InquirySubmitted(
                 inquiry.Id,
+                inquiry.UserId,
                 inquiry.PersonToken,
                 inquiry.Title,
                 inquiry.Description,

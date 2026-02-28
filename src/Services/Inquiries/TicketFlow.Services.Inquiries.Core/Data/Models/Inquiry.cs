@@ -5,6 +5,7 @@ namespace TicketFlow.Services.Inquiries.Core.Data.Models;
 public sealed class Inquiry
 {
     public Guid Id { get; private set; }
+    public Guid? UserId { get; private set; }
     public string PersonToken { get; private set; }
 
     public string Title { get; private set; }
@@ -18,9 +19,10 @@ public sealed class Inquiry
     {
     }
 
-    public Inquiry(string personToken, string title, string description, InquiryCategory category)
+    public Inquiry(Guid? userId, string personToken, string title, string description, InquiryCategory category)
     {
         Id = Guid.NewGuid();
+        UserId = userId;
         PersonToken = personToken;
         Title = title;
         Description = description;

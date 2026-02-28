@@ -27,8 +27,9 @@ services:
     volumes:
       - postgres:/var/lib/postgresql
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/jaeger:2.2.0
     container_name: jaeger
+    restart: unless-stopped
     networks:
       - TicketFlow
     ports:
@@ -36,13 +37,14 @@ services:
       - "6831:6831/udp"
       - "6832:6832/udp"
       - "4317:4317"
+      - "4318:4318"
       - "5778:5778"
       - "16686:16686"
       - "14268:14268"
       - "14250:14250"
       - "9411:9411"
     environment:
-      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+      COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
 
   prometheus:
     image: prom/prometheus:latest
@@ -54,13 +56,12 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts:/etc/prometheus/alerts
       - prometheus:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.enable-lifecycle'
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   grafana:
     image: grafana/grafana:latest
@@ -72,12 +73,63 @@ services:
       - "3001:3000"
     volumes:
       - grafana:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:
       - prometheus
+
+  # Langfuse - LLM Observability
+  langfuse-db:
+    image: postgres:15
+    container_name: ticketflow-langfuse-postgres
+    restart: unless-stopped
+    networks:
+      - TicketFlow
+    environment:
+      - POSTGRES_USER=langfuse
+      - POSTGRES_PASSWORD=langfuse
+      - POSTGRES_DB=langfuse
+    volumes:
+      - langfuse_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  langfuse:
+    image: langfuse/langfuse:2
+    container_name: ticketflow-langfuse
+    restart: unless-stopped
+    networks:
+      - TicketFlow
+    ports:
+      - "3102:3000"
+    environment:
+      - DATABASE_URL=postgresql://langfuse:langfuse@langfuse-db:5432/langfuse
+      - NEXTAUTH_SECRET=ticketflow-langfuse-secret-key-2024
+      - NEXTAUTH_URL=http://localhost:3102
+      - SALT=ticketflow-langfuse-salt-2024
+      - ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
+      - TELEMETRY_ENABLED=false
+      - LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true
+      # Auto-provision organization, project and user for students
+      - LANGFUSE_INIT_ORG_ID=ticketflow-org
+      - LANGFUSE_INIT_ORG_NAME=TicketFlow
+      - LANGFUSE_INIT_PROJECT_ID=ticketflow-agents
+      - LANGFUSE_INIT_PROJECT_NAME=TicketFlow Agents
+      - LANGFUSE_INIT_PROJECT_PUBLIC_KEY=pk-lf-9a3330c5-05f3-4221-949b-56376655363e
+      - LANGFUSE_INIT_PROJECT_SECRET_KEY=sk-lf-3dafbccf-593f-47fd-95fc-7b3bb386c2f8
+      - LANGFUSE_INIT_USER_EMAIL=student@ticketflow.local
+      - LANGFUSE_INIT_USER_NAME=Student
+      - LANGFUSE_INIT_USER_PASSWORD=student123
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
 
 networks:
   TicketFlow:
@@ -91,6 +143,8 @@ volumes:
   prometheus:
     driver: local
   grafana:
+    driver: local
+  langfuse_postgres:
     driver: local
  
   

@@ -4,6 +4,7 @@ namespace TicketFlow.Services.Inquiries.Core.Messaging.Publishing;
 
 public sealed record InquirySubmitted(
     Guid Id,
+    Guid? UserId,
     string PersonToken,
     string Title,
     string Description,

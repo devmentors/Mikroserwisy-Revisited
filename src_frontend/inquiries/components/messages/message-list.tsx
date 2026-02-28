@@ -1,33 +1,39 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query";
 import { Message } from "@/app/types/message";
 import { MessageItem } from "./message-item";
 import { getMessages } from "@/app/services/messages";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useUserStore } from "@/store/use-user-store";
 
 const MESSAGES_PER_PAGE = 5;
 
 export function MessageList() {
+  const { selectedUser } = useUserStore();
   const [showOnlyUnread, setShowOnlyUnread] = useState(() => {
     const stored = localStorage.getItem('showOnlyUnread')
     return stored ? JSON.parse(stored) : false
   })
 
-  const { 
-    data, 
-    isLoading, 
+  const {
+    data,
+    isLoading,
     error,
-    refetch 
+    refetch
   } = useQuery({
-    queryKey: ['messages', showOnlyUnread ? 'unread' : 'all'],
+    queryKey: ['messages', showOnlyUnread ? 'unread' : 'all', selectedUser?.userId],
     queryFn: async () => {
-      const response = await getMessages({ 
-        page: 1, 
+      if (!selectedUser?.userId) {
+        return { data: [], total: 0 };
+      }
+      const response = await getMessages({
+        page: 1,
         limit: MESSAGES_PER_PAGE,
-        onlyUnread: showOnlyUnread
+        onlyUnread: showOnlyUnread,
+        userId: selectedUser.userId
       });
       return response;
     },
@@ -71,13 +77,18 @@ export function MessageList() {
 }
 
 export function useUnreadMessages() {
-    
+  const { selectedUser } = useUserStore();
+
   return useQuery({
-    queryKey: ['messages', 'unreadCount'],
+    queryKey: ['messages', 'unreadCount', selectedUser?.userId],
     queryFn: async () => {
-      const response = await getMessages({ 
-        page: 1, 
-        limit: 100
+      if (!selectedUser?.userId) {
+        return 0;
+      }
+      const response = await getMessages({
+        page: 1,
+        limit: 100,
+        userId: selectedUser.userId
       });
       return response.data.filter(msg => !msg.isRead).length;
     },

@@ -70,6 +70,15 @@ namespace TicketFlow.Services.Tickets.Core.Data.Migrations.Tickets
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset?>("EscalatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("EscalatedToSupervisor")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("EscalationReason")
+                        .HasColumnType("text");
+
                     b.Property<string>("InternalNotes")
                         .HasColumnType("text");
 
@@ -84,6 +93,9 @@ namespace TicketFlow.Services.Tickets.Core.Data.Migrations.Tickets
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("QueuePosition")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Resolution")
                         .HasColumnType("text");
@@ -104,6 +116,9 @@ namespace TicketFlow.Services.Tickets.Core.Data.Migrations.Tickets
 
                     b.Property<string>("Type")
                         .HasColumnType("text");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Version")
                         .HasColumnType("integer");

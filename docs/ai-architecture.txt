@@ -1,0 +1,55 @@
+TicketFlow - Traditional Path + AI Path
+========================================
+
+Two paths to the same services. Left: deterministic code, right: AI agents.
+
+                 Traditional Path                    AI Path
+                 ────────────────                    ───────
+
+         ┌──────────────────────┐          ┌──────────────────────┐
+         │  Frontend Apps       │          │  Chatbot Frontend    │
+         │  :21000-21003        │          │  :21200 (CopilotKit) │
+         └──────────┬───────────┘          └──────────┬───────────┘
+                    │                                 │ AG-UI (SSE)
+         ┌──────────▼───────────┐          ┌──────────▼───────────┐
+         │  API Gateway (YARP)  │          │  ChatBot Agent       │
+         │  :5100               │          │  :8000               │
+         └──────────┬───────────┘          └────┬────────────┬────┘
+                    │                      MCP  │            │ A2A
+                    │                           │   ┌────────▼────────────┐
+                    │                           │   │  EscalationAgent    │
+                    │                           │   │  :8104               │
+                    │                           │   └────┬───────────┬────┘
+                    │                           │   MCP  │           │ A2A
+                    │                           │        │  ┌────────▼────────────┐
+                    │                           │        │  │  KnowledgeBase      │
+                    │                           │        │  │  :8106               │
+                    │                           │        │  └────────┬────────────┘
+                    │                           │        │      MCP  │
+                    │                      ┌────▼────────▼───────────▼────┐
+                    │                      │  MCP Servers                 │
+                    │                      │  (adapters: semantic tools)  │
+                    │                      │                              │
+                    │                      │  Tickets MCP    :5401       │
+                    │                      │  Inquiries MCP  :5501       │
+                    │                      └──────────────┬───────────────┘
+                    │                                     │
+         ┌──────────▼─────────────────────────────────────▼───────────────┐
+         │                     SERVICE LAYER                              │
+         │                                                                │
+         │  Tickets       :5400     Inquiries       :5500                │
+         │  Communication :5600     SLA             :5700                │
+         │  Translations  :5800     SystemMetrics   :5900                │
+         │  PersonalInfoVault :6100   Anonymization :6200                │
+         └──────────┬─────────────────────────────────────────────────────┘
+                    │
+         ┌──────────▼─────────────────────────────────────────────────────┐
+         │  RabbitMQ :5672  (async events)    PostgreSQL :5432 (per svc) │
+         └────────────────────────────────────────────────────────────────┘
+
+
+Protocols
+─────────
+  MCP    Agent → Tool      "call this function with these params"  (Streamable HTTP)
+  A2A    Agent → Agent     "achieve this goal"                     (JSON-RPC 2.0)
+  AG-UI  Frontend → Agent  "stream the response"                   (Server-Sent Events)

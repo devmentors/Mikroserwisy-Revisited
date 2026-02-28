@@ -7,6 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <InternalsVisibleTo Include="TicketFlow.Services.Tickets.Core.IntegrationTests" />
+      <InternalsVisibleTo Include="TicketFlow.Services.Tickets.Core.UnitTests" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\TicketFlow.CourseUtils\TicketFlow.CourseUtils.csproj" />
       <ProjectReference Include="..\..\..\Shared\TicketFlow.Shared.Contracts\TicketFlow.Shared.Contracts.csproj" />
       <ProjectReference Include="..\..\Communication\TicketFlow.Services.Communication.Alerting\TicketFlow.Services.Communication.Alerting.csproj" />

@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: chatbot-agent
+  description: AI-powered customer support chatbot with MCP tool integration
+  tags:
+    - dotnet
+    - ai-agent
+    - mcp-client
+    - llm
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-ai-team
+  system: ticketflow
+  dependsOn:
+    - component:tickets-mcp-server
+    - component:inquiries-mcp-server
+    - component:escalation-agent

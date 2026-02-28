@@ -11,6 +11,7 @@ import { faBug } from "@fortawesome/free-solid-svg-icons";
 import { Toaster } from "sonner";
 import { CustomNavigationMenu } from '@/components/custom/custom-nav';
 import { Footer } from "@/components/custom/footer";
+import { ClientRequired } from "@/components/custom/client-required";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -35,7 +36,9 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {children}
+              <ClientRequired>
+                {children}
+              </ClientRequired>
             </CardContent>
           </Card>
         </main>

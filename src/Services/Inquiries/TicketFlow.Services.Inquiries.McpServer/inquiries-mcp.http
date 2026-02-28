@@ -1,0 +1,35 @@
+@url = http://localhost:5501
+
+### MCP Card - manifest serwera
+GET {{url}}/mcp/card
+
+### Lista narzędzi (filtrowane po roli)
+POST {{url}}/
+Content-Type: application/json
+X-User-Role: client
+
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "tools/list"
+}
+
+### Wywołaj list_my_inquiries (scoped do użytkownika, semantyczna odpowiedź)
+POST {{url}}/
+Content-Type: application/json
+X-User-Role: client
+X-User-Id: 10000000-0000-0000-0000-000000000002
+# X-User-Id: 10000000-0000-0000-0000-000000123456 # user from antipattern demo
+
+{
+  "jsonrpc": "2.0",
+  "id": "2",
+  "method": "tools/call",
+  "params": {
+    "name": "list_my_inquiries",
+    "arguments": {
+      "page": 1,
+      "limit": 10
+    }
+  }
+}

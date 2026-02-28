@@ -14,7 +14,7 @@ pkill -9 -f "TicketFlow" 2>/dev/null
 sleep 2
 
 # Check and kill processes on specific ports
-for port in 5100 5200 5300 5400 5500 5600 5700 5800 5900; do
+for port in 5050 5100 5200 5300 5400 5500 5600 5700 5800 5900 6100 6200 8000; do
     pid=$(lsof -t -i:$port 2>/dev/null)
     if [ -n "$pid" ]; then
         echo "Killing process on port $port (PID: $pid)"
@@ -32,7 +32,7 @@ echo ""
 
 # Verify all ports are free
 echo "Verifying ports are free:"
-for port in 5100 5200 5300 5400 5500 5600 5700 5800 5900; do
+for port in 5050 5100 5200 5300 5400 5500 5600 5700 5800 5900 6100 6200 8000; do
     if lsof -i:$port >/dev/null 2>&1; then
         echo -e "${RED}✗ Port $port - STILL IN USE${NC}"
     else

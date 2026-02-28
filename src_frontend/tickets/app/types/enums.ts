@@ -18,7 +18,8 @@ export enum TicketStatus {
   "BeforeQualification" = "BeforeQualification",
   "Qualified" = "Qualified",
   "Resolved" = "Resolved",
-  "Blocked" = "Blocked"
+  "Blocked" = "Blocked",
+  "WaitingForCapacity" = "WaitingForCapacity"
 }
 
 export enum TicketType {

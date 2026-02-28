@@ -32,7 +32,12 @@ public static class Extensions
             .AddSource(
                 MessagingActivitySources.MessagingPublishSourceName, 
                 MessagingActivitySources.MessagingConsumeSourceName)
-            .AddAspNetCoreInstrumentation()
+            .AddAspNetCoreInstrumentation(options =>
+            {
+                options.Filter = context =>
+                    !context.Request.Path.StartsWithSegments("/metrics")
+                    && !context.Request.Path.StartsWithSegments("/health");
+            })
             .AddHttpClientInstrumentation()
             .AddOtlpExporter(options =>
             {

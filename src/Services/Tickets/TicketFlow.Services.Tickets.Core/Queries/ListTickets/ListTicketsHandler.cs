@@ -49,7 +49,11 @@ public class ListTicketsHandler(TicketsDbContext dbContext, IPersonalInfoVaultCl
                 x.LanguageCode,
                 x.Type,
                 x.DeadlineUtc,
-                x.Resolution);
+                x.Resolution,
+                x.QueuePosition,
+                x.EscalatedToSupervisor,
+                x.EscalationReason,
+                x.EscalatedAt);
         }).ToList();
 
         return new(data, total);

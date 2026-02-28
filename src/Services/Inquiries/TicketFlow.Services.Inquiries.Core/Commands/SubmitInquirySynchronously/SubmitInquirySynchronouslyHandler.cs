@@ -20,11 +20,11 @@ public class SubmitInquirySynchronouslyHandler(
 
     public async Task HandleAsync(SubmitInquirySynchronously command, CancellationToken cancellationToken = default)
     {
-        var (name, email, title, description, category) = command;
+        var (userId, name, email, title, description, category) = command;
 
         var personToken = await vaultClient.StorePersonalInfoAsync(name, email, cancellationToken);
         var categoryParsed = ParseCategory(category);
-        var inquiry = new Inquiry(personToken, title, description, categoryParsed);
+        var inquiry = new Inquiry(userId, personToken, title, description, categoryParsed);
 
         await repository.AddAsync(inquiry, cancellationToken);
 

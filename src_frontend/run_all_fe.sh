@@ -4,6 +4,20 @@
 API_MODE=${1:-gateway}
 export NEXT_PUBLIC_API_MODE=$API_MODE
 
+# Cleanup function
+cleanup() {
+    echo ""
+    echo "Stopping all frontend services..."
+    pkill -f "next-server" 2>/dev/null
+    pkill -f "next dev" 2>/dev/null
+    rm -f check_port.js kill_port.js 2>/dev/null
+    echo "All frontend services stopped"
+    exit 0
+}
+
+# Set up trap for cleanup
+trap cleanup SIGINT SIGTERM
+
 echo "============================================"
 echo "Starting frontend apps in '$API_MODE' mode"
 echo "============================================"
@@ -39,6 +53,7 @@ kill_port 21000
 kill_port 21001
 kill_port 21002
 kill_port 21003
+kill_port 21200
 
 # Install dependencies in parallel
 echo "Installing dependencies..."
@@ -46,6 +61,7 @@ echo "Installing dependencies..."
 (cd ./tickets/ && npm install) &
 (cd ./technical/ && npm install) &
 (cd ./dashboard/ && npm install) &
+(cd ./chatbot/ && npm install) &
 wait
 
 # Create a temporary Node.js script for port checking
@@ -55,12 +71,12 @@ const port = process.argv[2];
 
 function checkPort() {
     const socket = new net.Socket();
-    
+
     socket.on('connect', () => {
         socket.destroy();
         process.exit(0);
     });
-    
+
     socket.on('error', (err) => {
         socket.destroy();
         setTimeout(checkPort, 1000);
@@ -92,6 +108,7 @@ echo "Starting development servers..."
 (cd ./tickets/ && npm run dev) &
 (cd ./technical/ && npm run dev) &
 (cd ./dashboard/ && npm run dev) &
+(cd ./chatbot/ && npm run dev) &
 
 # Wait for ports to be available and warmup each application
 echo "Waiting for servers to be ready and warming up..."
@@ -99,12 +116,12 @@ wait_for_port 21000 && warmup_app 21000 &
 wait_for_port 21001 && warmup_app 21001 &
 wait_for_port 21002 && warmup_app 21002 &
 wait_for_port 21003 && warmup_app 21003 &
+wait_for_port 21200 && warmup_app 21200 &
 
 # Wait for all warmup processes to complete
 wait
 
 # Clean up temporary files
-rm check_port.js
-rm kill_port.js
+rm -f check_port.js kill_port.js
 
 echo "All applications are running and warmed up!"

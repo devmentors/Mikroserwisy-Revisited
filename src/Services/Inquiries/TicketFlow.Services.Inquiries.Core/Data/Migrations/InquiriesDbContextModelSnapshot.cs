@@ -53,6 +53,9 @@ namespace TicketFlow.Services.Inquiries.Core.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PersonToken");

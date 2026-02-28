@@ -74,6 +74,14 @@ public class TicketsTopologyInitializer : TopologyInitializerBase
             TopologyType.PublisherToPublisher,
             filter: "*.anonymization.#",
             cancellationToken: stoppingToken);
+
+        // Rebalance queue - listen to own TicketStatusChanged events
+        await topologyBuilder.CreateTopologyAsync(
+            publisherSource: TicketsMessagePublisherConventionProvider.ExchangeName,
+            consumerDestination: TicketsConsumerService.RebalanceQueue,
+            TopologyType.PublishSubscribe,
+            filter: "ticket-status-changed",
+            cancellationToken: stoppingToken);
     }
     
     private async Task CreateAlertingTopology(CancellationToken stoppingToken)

@@ -1,0 +1,5 @@
+Daj mi pelny raport: stan ticketow, obciazenie zespolu, i co wymaga mojej natychmiastowej reakcji
+
+Znajdz ticket "Aplikacja crashuje po aktualizacji" i zakwalifikuj go jako krytyczny
+
+Przypisz ticket "Nie działa wyszukiwarka produktów" do Kunegundy

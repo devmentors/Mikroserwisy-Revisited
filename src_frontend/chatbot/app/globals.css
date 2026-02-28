@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.copilotKitChat {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+.copilotKitMessages,
+.copilotKitMessagesContainer {
+  padding: 1.5rem 0 !important;
+  gap: 1.5rem !important;
+  max-width: 52rem !important;
+  margin: 0 auto !important;
+}
+
+.copilotKitMessage {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  font-weight: 400 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  margin-bottom: 0 !important;
+  max-width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.copilotKitAssistantMessage {
+  background: transparent !important;
+  border: none !important;
+  color: rgba(232, 230, 227, 0.95) !important;
+  padding: 0 !important;
+}
+
+.copilotKitUserMessage {
+  background: #374151 !important;
+  border: none !important;
+  border-radius: 1.5rem !important;
+  padding: 0.75rem 1.25rem !important;
+  margin-left: auto !important;
+  max-width: 80% !important;
+  width: fit-content !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.copilotKitMarkdown,
+.copilotKitMarkdownElement {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  color: inherit !important;
+}
+
+.copilotKitMarkdown p,
+.copilotKitMarkdownElement p {
+  margin-bottom: 1em !important;
+}
+
+.copilotKitMarkdown p:last-child,
+.copilotKitMarkdownElement p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.copilotKitMarkdown h1,
+.copilotKitMarkdown h2,
+.copilotKitMarkdown h3,
+.copilotKitMarkdownElement h1,
+.copilotKitMarkdownElement h2,
+.copilotKitMarkdownElement h3 {
+  font-weight: 600 !important;
+  margin-top: 1.25em !important;
+  margin-bottom: 0.5em !important;
+  color: #fff !important;
+}
+
+.copilotKitMarkdown strong,
+.copilotKitMarkdownElement strong {
+  font-weight: 600 !important;
+  color: #fff !important;
+}
+
+.copilotKitMarkdown ul,
+.copilotKitMarkdown ol,
+.copilotKitMarkdownElement ul,
+.copilotKitMarkdownElement ol {
+  padding-left: 1.5em !important;
+  margin: 0.75em 0 !important;
+}
+
+.copilotKitMarkdown li,
+.copilotKitMarkdownElement li {
+  margin-bottom: 0.4em !important;
+}
+
+.copilotKitMarkdown pre,
+.copilotKitMarkdownElement pre {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  padding: 1rem !important;
+  margin: 1rem 0 !important;
+  overflow-x: auto !important;
+}
+
+.copilotKitMarkdown code,
+.copilotKitMarkdownElement code {
+  font-family: "Google Sans Mono", "SF Mono", Menlo, Monaco, monospace !important;
+  font-size: 13px !important;
+}
+
+.copilotKitMarkdown code:not(pre code),
+.copilotKitMarkdownElement code:not(pre code) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  padding: 0.125em 0.375em !important;
+  border-radius: 0.25rem !important;
+}
+
+.copilotKitInputWrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.copilotKitInputContainer,
+.copilotKitInputContainer.poweredByContainer {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  max-width: 52rem !important;
+  margin: 0 auto !important;
+}
+
+.copilotKitInput:focus-within {
+  border-color: #505050 !important;
+}
+
+.copilotKitInputContainer textarea,
+.copilotKitInputContainer input {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 15px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 0.75rem 1rem !important;
+  min-height: auto !important;
+}
+
+.copilotKitInputContainer textarea:focus,
+.copilotKitInputContainer input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.copilotKitInputContainer textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.copilotKitInput {
+  background: #1f1f1f !important;
+  border: 1px solid #3a3a3a !important;
+  border-radius: 1.5rem !important;
+  box-shadow: none !important;
+  padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.copilotKitInputControls {
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.copilotKitInputControlButton {
+  background: rgb(234, 88, 12) !important;
+  border-radius: 50% !important;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-width: 2.25rem !important;
+  min-height: 2.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.copilotKitInputControlButton:hover:not(:disabled) {
+  background: rgb(220, 80, 10) !important;
+  transform: scale(1.05) !important;
+}
+
+.copilotKitInputControlButton:disabled {
+  background: rgba(234, 88, 12, 0.5) !important;
+}
+
+.copilotKitInputControlButton svg,
+.copilotKitInputControlButton img {
+  width: 1rem !important;
+  height: 1rem !important;
+  filter: brightness(0) invert(1) !important;
+}
+
+.copilotKitMessageControls {
+  opacity: 0 !important;
+  transition: opacity 0.15s ease !important;
+}
+
+.copilotKitMessage:hover .copilotKitMessageControls {
+  opacity: 1 !important;
+}
+
+.copilotKitMessageControlButton {
+  opacity: 0.5 !important;
+}
+
+.copilotKitMessageControlButton:hover {
+  opacity: 1 !important;
+}
+
+.copilotKitMessagesFooter {
+  font-size: 12px !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  text-align: center !important;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 24.6 95% 53.1%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 20.5 90.2% 48.2%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 60 9.1% 97.8%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 20.5 90.2% 48.2%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

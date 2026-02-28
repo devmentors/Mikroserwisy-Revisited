@@ -1,0 +1,65 @@
+groups:
+  - name: ai_alerts
+    rules:
+      - alert: OllamaHighInferenceTime
+        expr: histogram_quantile(0.99, sum(rate(ai_inference_duration_bucket[5m])) by (le, model)) > 5000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High AI inference time (p99 > 5s)"
+          description: "Model {{ $labels.model }} has p99 inference time of {{ $value }}ms"
+
+      - alert: OllamaVeryHighInferenceTime
+        expr: histogram_quantile(0.99, sum(rate(ai_inference_duration_bucket[5m])) by (le, model)) > 10000
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Very high AI inference time (p99 > 10s)"
+          description: "Model {{ $labels.model }} has p99 inference time of {{ $value }}ms. Consider switching to smaller model or checking GPU load."
+
+      - alert: AIHighErrorRate
+        expr: sum(rate(ai_errors_total[5m])) / sum(rate(ai_requests_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High AI error rate (>10%)"
+          description: "AI error rate is {{ $value | humanizePercentage }}. Check Ollama logs and model availability."
+
+      - alert: AIVeryHighErrorRate
+        expr: sum(rate(ai_errors_total[5m])) / sum(rate(ai_requests_total[5m])) > 0.3
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical AI error rate (>30%)"
+          description: "AI error rate is {{ $value | humanizePercentage }}. Immediate investigation required."
+
+      - alert: OllamaUnresponsive
+        expr: up{job="ollama"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ollama service is down"
+          description: "Ollama endpoint is not responding. AI features are unavailable."
+
+      - alert: AIUnusualToolUsage
+        expr: sum(increase(ai_tool_calls_total[1h])) by (tool) > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unusual high tool usage"
+          description: "Tool {{ $labels.tool }} called {{ $value }} times in the last hour. Verify if this is expected."
+
+      - alert: AILowSuccessRate
+        expr: 1 - (sum(rate(ai_errors_total[1h])) / sum(rate(ai_requests_total[1h]))) < 0.8
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low AI success rate (<80%)"
+          description: "AI success rate is {{ $value | humanizePercentage }}. Review prompts and model configuration."

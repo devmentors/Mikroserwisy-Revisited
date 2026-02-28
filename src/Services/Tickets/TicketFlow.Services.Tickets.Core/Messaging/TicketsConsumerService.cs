@@ -3,6 +3,7 @@ using TicketFlow.CourseUtils;
 using TicketFlow.Services.Tickets.Core.Messaging.Consuming.AnonymizationRequested;
 using TicketFlow.Services.Tickets.Core.Messaging.Consuming.DeadlinesCalculated;
 using TicketFlow.Services.Tickets.Core.Messaging.Consuming.InquirySubmitted;
+using TicketFlow.Services.Tickets.Core.Messaging.Consuming.Rebalance;
 using TicketFlow.Services.Tickets.Core.Messaging.Consuming.TranslationCompleted;
 using TicketFlow.Services.Tickets.Core.Messaging.Publishing;
 using TicketFlow.Shared.AnomalyGeneration.MessagingApi;
@@ -17,6 +18,7 @@ internal sealed class TicketsConsumerService(IMessageConsumer messageConsumer, A
     public const string AnonymizationQueue = "tickets-anonymization-queue";
     public const string InquirySubmittedQueue = "inquiry-submitted-tickets-queue";
     public const string TranslationCompletedQueue = "translation-completed-tickets-queue";
+    public const string RebalanceQueue = "tickets-rebalance-status-changed";  // Own queue to avoid stealing events
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -36,6 +38,10 @@ internal sealed class TicketsConsumerService(IMessageConsumer messageConsumer, A
             await messageConsumer.ConsumeMessage<TicketCreated>(queue: TicketCreatedQueue, acceptedMessageTypes: ["TicketCreated"], cancellationToken: stoppingToken);
         }
         await messageConsumer.ConsumeMessage<AnonymizationRequested>(queue: AnonymizationQueue, acceptedMessageTypes: null, cancellationToken: stoppingToken);
+
+        // Rebalance trigger - listens to ticket status changes
+        await messageConsumer.ConsumeMessage<Consuming.Rebalance.TicketStatusChanged>(queue: RebalanceQueue, acceptedMessageTypes: null, cancellationToken: stoppingToken);
+
         await anomalyConfigurator.ConsumeAnomalyChanges();
     }
 }

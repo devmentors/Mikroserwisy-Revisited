@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState } from 'react'
-import { useForm, ControllerRenderProps, Control } from 'react-hook-form'
+import React, { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -13,9 +13,10 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from '@/components/ui/select'
-import { InquiryCategory, InquiryStatus } from '@/app/types/enums'
+import { InquiryCategory } from '@/app/types/enums'
 import { inquiryCategoryTranslations } from '@/app/lib/translations'
 import { createInquiry } from '@/app/services/inquiryService';
+import { useUserStore } from '@/store/use-user-store';
 
 const categoryOptions = [
   { value: InquiryCategory.TECHNICAL, label: inquiryCategoryTranslations[InquiryCategory.TECHNICAL] },
@@ -36,24 +37,30 @@ type FormValues = z.infer<typeof formSchema>
 
 const InquiryForm: React.FC = () => {
   const router = useRouter()
+  const { selectedUser } = useUserStore();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      name: '',
-      email: '',
+      name: selectedUser.name,
+      email: selectedUser.email,
       description: '',
       category: InquiryCategory.TECHNICAL,
     }
   });
 
+  // Update form when user changes
+  useEffect(() => {
+    form.setValue('name', selectedUser.name);
+    form.setValue('email', selectedUser.email);
+  }, [selectedUser, form]);
+
   const { handleSubmit } = form;
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await createInquiry({
-        ...data
-      });
+      await createInquiry(data, selectedUser.userId);
 
       toast.success('Zgłoszenie zostało wysłane');
       router.push('/inquiries-list');
@@ -92,7 +99,12 @@ const InquiryForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Imię</FormLabel>
                   <FormControl>
-                    <Input placeholder="Wprowadź swoje imię" {...field} />
+                    <Input
+                      placeholder="Wprowadź swoje imię"
+                      {...field}
+                      disabled
+                      className="bg-muted cursor-not-allowed"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,7 +118,13 @@ const InquiryForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="twoj@email.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="twoj@email.com"
+                      {...field}
+                      disabled
+                      className="bg-muted cursor-not-allowed"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

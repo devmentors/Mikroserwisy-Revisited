@@ -14,6 +14,7 @@ export const ticketStatusTranslations = {
   [TicketStatus.Qualified]: "Zakwalifikowane",
   [TicketStatus.Resolved]: "Rozwiązane",
   [TicketStatus.Blocked]: "Zablokowane",
+  [TicketStatus.WaitingForCapacity]: "Oczekujące w kolejce",
 } as const;
 
 export const ticketSeverityTranslations = {

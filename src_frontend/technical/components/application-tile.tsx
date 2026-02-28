@@ -120,23 +120,9 @@ export function ApplicationTile({ applicationName, applicationBaseAddress, icon 
                         <div className="flex gap-4 mb-2">
                             <Select
                                 value={newAnomaly.anomalyType}
-                                onValueChange={(value) => {
-                                    const anomalyType = value as AnomalyType;
-                                    const isDelayAnomaly = anomalyType === AnomalyType.ConsumerDelayBeforeHandler ||
-                                                          anomalyType === AnomalyType.ConsumerDelayAfterHandler;
-
-                                    setNewAnomaly(prev => {
-                                        const newParams = new Map(prev.additionalParams);
-                                        if (isDelayAnomaly && !newParams.has('DelayInMs')) {
-                                            newParams.set('DelayInMs', '1000');
-                                        }
-                                        return { ...prev, anomalyType, additionalParams: newParams };
-                                    });
-
-                                    if (isDelayAnomaly) {
-                                        setParamKey('DelayInMs');
-                                    }
-                                }}
+                                onValueChange={(value) => 
+                                    setNewAnomaly(prev => ({ ...prev, anomalyType: value as AnomalyType }))
+                                }
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Wybierz typ anomalii" />

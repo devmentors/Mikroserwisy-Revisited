@@ -31,7 +31,7 @@ import { ticketCategoryTranslations, ticketStatusTranslations, ticketSeverityTra
 import { useState } from "react"
 import { severityConfig, statusConfig } from "@/lib/ticket-styling"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faCircle, faCircleExclamation, faTriangleExclamation, faFire } from "@fortawesome/free-solid-svg-icons"
+import { faCircle, faCircleExclamation, faTriangleExclamation, faFire, faExclamationTriangle, faHourglassHalf } from "@fortawesome/free-solid-svg-icons"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Clock } from "lucide-react"
@@ -111,6 +111,42 @@ export function TicketDetails({ ticket, open, onOpenChange }: TicketDetailsProps
                 </div>
               </div>
             </div>
+
+            {ticket.queuePosition !== null && ticket.queuePosition !== undefined && (
+              <div className="space-y-2">
+                <Label htmlFor="queuePosition">Pozycja w kolejce</Label>
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                  <FontAwesomeIcon icon={faHourglassHalf} className="text-muted-foreground" />
+                  <span className="font-medium">#{ticket.queuePosition}</span>
+                  <span className="text-sm text-muted-foreground">- Zgłoszenie oczekuje na dostępność agenta</span>
+                </div>
+              </div>
+            )}
+
+            {ticket.escalatedToSupervisor && (
+              <div className="space-y-2">
+                <Label>Eskalacja do przełożonego</Label>
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FontAwesomeIcon icon={faExclamationTriangle} className="text-destructive" />
+                    <span className="font-medium text-destructive">Zgłoszenie eskalowane</span>
+                  </div>
+                  {ticket.escalationReason && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      <strong>Powód:</strong> {ticket.escalationReason}
+                    </p>
+                  )}
+                  {ticket.escalatedAt && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      <strong>Data eskalacji:</strong> {new Date(ticket.escalatedAt).toLocaleString('pl-PL', {
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="category">Kategoria</Label>

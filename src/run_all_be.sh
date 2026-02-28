@@ -8,6 +8,26 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# PID tracking
+SERVICE_PIDS=()
+
+# Cleanup function
+cleanup() {
+    echo ""
+    echo -e "  ${YELLOW}Stopping all services...${NC}"
+    for pid in "${SERVICE_PIDS[@]}"; do
+        kill "$pid" 2>/dev/null
+    done
+    pkill -f "TicketFlow" 2>/dev/null
+    sleep 1
+    pkill -9 -f "TicketFlow" 2>/dev/null
+    echo -e "  ${GREEN}✓${NC} All services stopped"
+    exit 0
+}
+
+# Set up trap for cleanup
+trap cleanup SIGINT SIGTERM
+
 # Clear screen for clean output
 clear
 
@@ -16,6 +36,13 @@ echo -e "${CYAN}╔════════════════════�
 echo -e "${CYAN}║           ${BLUE}TicketFlow Backend Services${CYAN}                      ║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
+
+# Kill existing BE processes
+echo -e "  ${YELLOW}◉${NC} Killing existing backend processes..."
+pkill -f "TicketFlow" 2>/dev/null
+sleep 1
+pkill -9 -f "TicketFlow" 2>/dev/null
+echo -e "  ${GREEN}✓${NC} Existing processes killed"
 
 # Spinner function
 spin() {
@@ -50,19 +77,39 @@ printf "  ${YELLOW}◉${NC} Starting services..."
 
 # Start API Gateway
 (cd ApiGateway/TicketFlow.ApiGateway && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
 
 # Start BFF
 (cd BFF/TicketFlow.BFF && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
 
 # Start ClientsAPI (External Edge Layer)
 (cd ClientsAPI/TicketFlow.ClientsAPI && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
 
-# Start all services
+# Start all API services
 for dir in Services/*/*.Api/; do
     if [ -d "$dir" ]; then
         (cd "$dir" && dotnet run --no-build > /dev/null 2>&1) &
+        SERVICE_PIDS+=($!)
     fi
 done
+
+# Start all MCP Servers
+for dir in Services/*/*.McpServer/; do
+    if [ -d "$dir" ]; then
+        (cd "$dir" && dotnet run --no-build > /dev/null 2>&1) &
+        SERVICE_PIDS+=($!)
+    fi
+done
+
+# Start all Agents (C#)
+(cd Agents/TicketFlow.Agents.ChatBot && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
+(cd Agents/TicketFlow.Agents.Escalation && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
+(cd Agents/TicketFlow.Agents.KnowledgeBase && dotnet run --no-build > /dev/null 2>&1) &
+SERVICE_PIDS+=($!)
 
 # Wait for services to start
 sleep 8
@@ -87,6 +134,17 @@ echo -e "${GREEN}║${NC}  Translations             ${CYAN}http://localhost:5800
 echo -e "${GREEN}║${NC}  SystemMetrics            ${CYAN}http://localhost:5900${NC}          ${GREEN}║${NC}"
 echo -e "${GREEN}║${NC}  PersonalInfoVault        ${CYAN}http://localhost:6100${NC}          ${GREEN}║${NC}"
 echo -e "${GREEN}║${NC}  Anonymization            ${CYAN}http://localhost:6200${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}╠═══════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║${NC}  ${YELLOW}MCP SERVERS${NC}                                               ${GREEN}║${NC}"
+echo -e "${GREEN}╠═══════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║${NC}  Inquiries MCP            ${CYAN}http://localhost:5501${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  Tickets MCP              ${CYAN}http://localhost:5401${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}╠═══════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║${NC}  ${YELLOW}AI AGENTS${NC}                                                 ${GREEN}║${NC}"
+echo -e "${GREEN}╠═══════════════════════════════════════════════════════════╣${NC}"
+echo -e "${GREEN}║${NC}  ChatBot Agent (AG-UI)    ${CYAN}http://localhost:8000${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  Escalation Agent         ${CYAN}http://localhost:8104${NC}          ${GREEN}║${NC}"
+echo -e "${GREEN}║${NC}  KnowledgeBase Agent      ${CYAN}http://localhost:8106${NC}          ${GREEN}║${NC}"
 echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  ${YELLOW}TIP:${NC} Press ${RED}Ctrl+C${NC} to stop all services"

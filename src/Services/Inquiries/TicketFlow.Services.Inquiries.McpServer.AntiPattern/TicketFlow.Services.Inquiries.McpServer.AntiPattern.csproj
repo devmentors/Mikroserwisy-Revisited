@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--
+        ⚠️ ANTI-PATTERN: Direct Npgsql dependency in MCP layer!
+
+        Problem: MCP Server should NOT have direct database access.
+        Connection string must be passed to this project, which means:
+        - Credentials exposed in presentation layer
+        - No layer isolation
+        - Tight coupling to specific database
+        -->
+        <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.5.0-preview.1" />
+        <PackageReference Include="Npgsql" Version="9.0.3" />
+    </ItemGroup>
+
+</Project>

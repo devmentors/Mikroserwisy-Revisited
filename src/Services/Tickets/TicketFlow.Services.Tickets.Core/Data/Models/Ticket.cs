@@ -5,6 +5,7 @@ namespace TicketFlow.Services.Tickets.Core.Data.Models;
 public sealed class Ticket
 {
     public Guid Id { get; }
+    public Guid? UserId { get; }
     public string PersonToken { get; }
     public string Title { get; private set; }
     public string Description { get; }
@@ -23,6 +24,12 @@ public sealed class Ticket
     public DateTimeOffset? DeadlineUtc { get; private set; }
     public string? Resolution { get; private set; }
 
+    // Queue tracking for WaitingForCapacity status
+    public int? QueuePosition { get; private set; }  // Position in waiting queue (null if not waiting)
+    public bool EscalatedToSupervisor { get; private set; }  // Has supervisor been notified
+    public string? EscalationReason { get; private set; }  // Why escalated (for audit)
+    public DateTimeOffset? EscalatedAt { get; private set; }  // When escalated
+
     private bool _versionAlreadyChanged;
     
     public Agent? AssignedAgent { get; private set; }
@@ -33,9 +40,10 @@ public sealed class Ticket
     {
     }
 
-    public Ticket(Guid id, string personToken, string title, string description, TicketCategory category, string languageCode)
+    public Ticket(Guid id, Guid? userId, string personToken, string title, string description, TicketCategory category, string languageCode)
     {
         Id = id;
+        UserId = userId;
         PersonToken = personToken;
         Title = title;
         Description = description;
@@ -91,13 +99,21 @@ public sealed class Ticket
         {
             throw new TicketFlowException("Cannot assign agent before qualification or after the ticket is resolved.");
         }
-        
+
         if (AssignedTo is not null)
         {
             throw new TicketFlowException("Cannot reassign agent.");
         }
-        
+
         AssignedTo = agentId;
+
+        // If ticket was waiting for capacity, transition back to Qualified
+        if (Status == TicketStatus.WaitingForCapacity)
+        {
+            Status = TicketStatus.Qualified;
+            ClearQueueTracking();
+        }
+
         IncreaseVersion();
     }
 
@@ -183,6 +199,40 @@ public sealed class Ticket
     {
         DeadlineUtc = deadline;
         IncreaseVersion();
+    }
+
+    public void SetWaitingForCapacity(int queuePosition, string reason)
+    {
+        if (Status is TicketStatus.Resolved)
+        {
+            throw new TicketFlowException("Cannot set ticket waiting after is resolved.");
+        }
+
+        if (AssignedTo is not null)
+        {
+            throw new TicketFlowException("Cannot set ticket waiting when already assigned to an agent.");
+        }
+
+        Status = TicketStatus.WaitingForCapacity;
+        QueuePosition = queuePosition;
+        EscalationReason = reason;
+        AddInternalNote($"WAITING FOR CAPACITY: {reason} - Queue position: {queuePosition}");
+        IncreaseVersion();
+    }
+
+    public void SetEscalatedToSupervisor(string reason)
+    {
+        EscalatedToSupervisor = true;
+        EscalationReason = reason;
+        EscalatedAt = DateTimeOffset.UtcNow;
+        AddInternalNote($"ESCALATED TO SUPERVISOR: {reason}");
+        IncreaseVersion();
+    }
+
+    public void ClearQueueTracking()
+    {
+        QueuePosition = null;
+        // Note: Don't clear EscalatedToSupervisor/EscalationReason - keep for audit trail
     }
 
     private void IncreaseVersion()

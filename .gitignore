@@ -396,5 +396,17 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.idea/
 
 .cursorrules
+.playwright-mcp/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Backup files
+*.backup
+*.bak
+*.sln.backup

@@ -30,15 +30,16 @@ import { severityConfig, statusConfig } from "@/lib/ticket-styling"
 import { TicketDetails } from "@/components/ticket-details"
 import { useAgentStore } from "@/store/use-agent-store"
 import { TicketSettingsDialog } from "@/components/ticket-settings-dialog"
-import { 
-  faUserPlus, 
+import {
+  faUserPlus,
   faUserMinus,
   faClipboardCheck,
   faEye,
   faQuestion,
   faLock,
   faUnlock,
-  faCheck
+  faCheck,
+  faExclamationTriangle
 } from "@fortawesome/free-solid-svg-icons"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { useState } from "react"
@@ -62,13 +63,29 @@ export const columns: ColumnDef<Ticket>[] = [
     cell: ({ row }) => {
       const title = row.getValue("title") as string;
       const category = row.original.category as TicketCategory;
-      
+      const escalated = row.original.escalatedToSupervisor;
+
       const categoryLabel = ticketCategoryTranslations[category];
-      
+
       return (
-        <div className="flex items-center">
-          <span className="font-medium text-muted-foreground mr-2">[{categoryLabel || category}]</span>
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-muted-foreground">[{categoryLabel || category}]</span>
           <span>{title}</span>
+          {escalated && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge variant="destructive" className="ml-1">
+                    <FontAwesomeIcon icon={faExclamationTriangle} className="mr-1" />
+                    Eskalacja
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Zgłoszenie zostało eskalowane do przełożonego</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
       );
     }
@@ -78,7 +95,8 @@ export const columns: ColumnDef<Ticket>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as TicketStatus;
-      
+      const queuePosition = row.original.queuePosition;
+
       if (!statusConfig) {
         console.error('statusConfig is undefined');
         return <div>Loading...</div>;
@@ -91,11 +109,16 @@ export const columns: ColumnDef<Ticket>[] = [
       };
 
       return (
-        <div className="flex justify-start items-center">
+        <div className="flex flex-col gap-1">
           <Badge variant={config.variant}>
             <FontAwesomeIcon icon={config.icon} className="mr-2" />
             {config.label}
           </Badge>
+          {queuePosition !== null && queuePosition !== undefined && (
+            <span className="text-xs text-muted-foreground">
+              Pozycja w kolejce: #{queuePosition}
+            </span>
+          )}
         </div>
       )
     }
@@ -104,11 +127,12 @@ export const columns: ColumnDef<Ticket>[] = [
     accessorKey: "createdAt",
     header: "Data przesłania",
     cell: ({ row }) => {
+      const createdAt = row.getValue("createdAt");
       return <div>
-        {(row.getValue("createdAt") as Date).toLocaleString('pl-PL', {
+        {createdAt ? new Date(createdAt as string).toLocaleString('pl-PL', {
           dateStyle: 'short',
           timeStyle: 'short'
-        })}
+        }) : 'N/A'}
       </div>
     },
   },

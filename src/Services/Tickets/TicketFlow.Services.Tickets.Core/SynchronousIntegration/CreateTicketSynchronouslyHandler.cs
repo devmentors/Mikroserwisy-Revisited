@@ -20,7 +20,7 @@ internal sealed class CreateTicketSynchronouslyHandler(
             categoryParsed = TicketCategory.Other;
         }
 
-        var ticket = new Ticket(id, personToken, title, description, categoryParsed, languageCode);
+        var ticket = new Ticket(id, null, personToken, title, description, categoryParsed, languageCode);
         ticket.SetTranslation(translatedDescription);
 
         await repository.AddAsync(ticket, cancellationToken);

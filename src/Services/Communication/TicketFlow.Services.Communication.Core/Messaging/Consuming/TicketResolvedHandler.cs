@@ -20,11 +20,12 @@ public class TicketResolvedHandler(ITicketsClient ticketsClient, CommunicationDb
         await dbContext.Messages.AddAsync(
             new Message
             {
+                RecipentUserId = ticketDetails.UserId,
                 RecipentEmail = ticketDetails.Email,
                 Title = "Zgłoszenie zamknięte!",
                 Content =
-                    $@"Zakończono procesowanie twojego zgłoszenia 
-                        ze statusem: [{ticketDetails.Status}], 
+                    $@"Zakończono procesowanie twojego zgłoszenia
+                        ze statusem: [{ticketDetails.Status}],
                         rozwiązaniem: {ticketDetails.Resolution}",
                 SenderUserId = ticketDetails.AssignedAgentUserId,
                 Timestamp = DateTimeOffset.UtcNow

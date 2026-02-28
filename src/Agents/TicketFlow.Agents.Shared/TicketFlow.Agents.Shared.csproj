@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.AI" Version="9.10.2-preview.1.25552.1" />
+        <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.10.2-preview.1.25552.1" />
+        <PackageReference Include="ModelContextProtocol" Version="0.5.0-preview.1" />
+        <PackageReference Include="OpenAI" Version="2.6.0" />
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.10.0-rc.1" />
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.0" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.0" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.11.0" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Shared\TicketFlow.Shared\TicketFlow.Shared.csproj" />
+    </ItemGroup>
+
+</Project>

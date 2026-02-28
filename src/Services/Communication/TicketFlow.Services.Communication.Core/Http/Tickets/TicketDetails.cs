@@ -2,6 +2,7 @@
 
 public record TicketDto(
     string Id,
+    Guid? UserId,
     string Email,
     string Status,
     Guid? AssignedAgentUserId,

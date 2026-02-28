@@ -41,9 +41,9 @@ public static class Extensions
                 .UseResiliency())
             .AddMetrics(configuration);
 
-        services.AddHostedService<DbInitializer>();
         services.AddHostedService<VaultTopologyInitializer>();
         services.AddHostedService<VaultConsumerService>();
+        services.AddDemoPersonalInfoInitializer();
 
         return services;
     }

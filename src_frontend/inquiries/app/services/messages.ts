@@ -4,6 +4,7 @@ import { API } from '@/lib/api-config';
 interface GetMessagesParams {
   page: number;
   limit: number;
+  userId: string;
   onlyUnread?: boolean;
 }
 
@@ -12,8 +13,8 @@ interface MessagesResponse {
   total: number;
 }
 
-export async function getMessages({ page, limit, onlyUnread }: GetMessagesParams): Promise<MessagesResponse> {
-  const url = new URL(`${API.communication}/anonymous-users/messages`);
+export async function getMessages({ page, limit, userId, onlyUnread }: GetMessagesParams): Promise<MessagesResponse> {
+  const url = new URL(`${API.communication}/logged-users/${userId}/messages/`);
   url.searchParams.set('page', page.toString());
   url.searchParams.set('limit', limit.toString());
   if (onlyUnread) {

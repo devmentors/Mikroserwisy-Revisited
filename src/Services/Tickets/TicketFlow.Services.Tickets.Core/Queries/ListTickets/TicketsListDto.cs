@@ -19,4 +19,8 @@ public record TicketsListEntryDto(
     string LanguageCode,
     TicketType? Type,
     DateTimeOffset? Deadline,
-    string? Resolution = null);
+    string? Resolution = null,
+    int? QueuePosition = null,
+    bool EscalatedToSupervisor = false,
+    string? EscalationReason = null,
+    DateTimeOffset? EscalatedAt = null);

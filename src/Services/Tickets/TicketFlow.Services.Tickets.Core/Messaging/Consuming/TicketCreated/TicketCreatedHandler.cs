@@ -20,7 +20,7 @@ public class TicketCreatedHandler(ITicketsRepository repository) : IMessageHandl
             categoryParsed = TicketCategory.Other;
         }
         
-        var ticket = new Ticket(message.Id, message.PersonToken, message.Title, message.Description, categoryParsed, message.LanguageCode);
+        var ticket = new Ticket(message.Id, null, message.PersonToken, message.Title, message.Description, categoryParsed, message.LanguageCode);
         
         var scheduledAction = await repository.GetScheduledAction(message.Id, cancellationToken);
 

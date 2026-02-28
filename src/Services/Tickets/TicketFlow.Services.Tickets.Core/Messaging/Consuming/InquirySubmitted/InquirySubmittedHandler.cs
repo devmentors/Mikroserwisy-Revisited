@@ -9,29 +9,29 @@ public sealed class InquirySubmittedHandler(ITicketsRepository repository, IMess
     : IMessageHandler<InquirySubmitted>, IMessageHandler<Shared.Contracts.Inquiries.Events.InquirySubmitted>
 {
     public Task HandleAsync(InquirySubmitted message, CancellationToken cancellationToken = default)
-        => ProcessInquiry(message.Id, message.PersonToken, message.Title,
+        => ProcessInquiry(message.Id, message.UserId, message.PersonToken, message.Title,
             message.Description, message.Category, message.LanguageCode, cancellationToken);
 
     public Task HandleAsync(Shared.Contracts.Inquiries.Events.InquirySubmitted message, CancellationToken cancellationToken = default)
-        => ProcessInquiry(message.Id, message.PersonToken, message.Title,
+        => ProcessInquiry(message.Id, message.UserId, message.PersonToken, message.Title,
             message.Description, message.Category, message.LanguageCode, cancellationToken);
 
     private async Task ProcessInquiry(
-        Guid id, string personToken, string title,
+        Guid id, Guid? userId, string personToken, string title,
         string description, string category, string languageCode,
         CancellationToken cancellationToken)
     {
         if (!FeatureFlags.UseListenToYourselfExample)
         {
-            await HandleDefault(id, personToken, title, description, category, languageCode, cancellationToken);
+            await HandleDefault(id, userId, personToken, title, description, category, languageCode, cancellationToken);
         }
         else
         {
-            await HandleWithListenToYourself(id, personToken, title, description, category, languageCode, cancellationToken);
+            await HandleWithListenToYourself(id, userId, personToken, title, description, category, languageCode, cancellationToken);
         }
     }
 
-    private async Task HandleDefault(Guid id, string personToken, string title, string description,
+    private async Task HandleDefault(Guid id, Guid? userId, string personToken, string title, string description,
         string category, string languageCode, CancellationToken cancellationToken)
     {
         if (await repository.ExistsAsync(id, cancellationToken))
@@ -45,7 +45,7 @@ public sealed class InquirySubmittedHandler(ITicketsRepository repository, IMess
             categoryParsed = TicketCategory.Other;
         }
 
-        var ticket = new Ticket(id, personToken, title, description, categoryParsed, languageCode);
+        var ticket = new Ticket(id, userId, personToken, title, description, categoryParsed, languageCode);
 
         var scheduledAction = await repository.GetScheduledAction(id, cancellationToken);
 
@@ -72,7 +72,7 @@ public sealed class InquirySubmittedHandler(ITicketsRepository repository, IMess
         await messagePublisher.PublishAsync(ticketCreatedMessage, cancellationToken: cancellationToken);
     }
 
-    private async Task HandleWithListenToYourself(Guid id, string personToken, string title, string description,
+    private async Task HandleWithListenToYourself(Guid id, Guid? userId, string personToken, string title, string description,
         string category, string languageCode, CancellationToken cancellationToken)
     {
         if (await repository.ExistsAsync(id, cancellationToken))
@@ -86,7 +86,7 @@ public sealed class InquirySubmittedHandler(ITicketsRepository repository, IMess
             categoryParsed = TicketCategory.Other;
         }
 
-        var ticket = new Ticket(Guid.NewGuid(), personToken, title, description, categoryParsed, languageCode);
+        var ticket = new Ticket(Guid.NewGuid(), userId, personToken, title, description, categoryParsed, languageCode);
 
         var scheduledAction = await repository.GetScheduledAction(id, cancellationToken);
 

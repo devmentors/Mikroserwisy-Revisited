@@ -30,6 +30,3 @@ const mode = (process.env.NEXT_PUBLIC_API_MODE || 'gateway') as ApiMode;
 
 export const API = API_URLS[mode];
 export const API_MODE = mode;
-
-// Direct URLs for endpoints that are not exposed through API Gateway (e.g., /anomalies)
-export const DIRECT_API = API_URLS['direct'];

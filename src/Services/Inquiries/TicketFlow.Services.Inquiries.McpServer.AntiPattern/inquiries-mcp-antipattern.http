@@ -1,0 +1,29 @@
+@url = http://localhost:5502
+
+### Lista narzędzi (brak filtrowania po roli!)
+POST {{url}}/
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "tools/list"
+}
+
+### Wywołaj query_inquiries_direct (widzi WSZYSTKO, eksponuje PII)
+POST {{url}}/
+Content-Type: application/json
+X-User-Id: 10000000-0000-0000-0000-000111123456
+# X-User-Id: 10000000-0000-0000-0000-000000000002 # Existing user
+
+{
+  "jsonrpc": "2.0",
+  "id": "2",
+  "method": "tools/call",
+  "params": {
+    "name": "query_inquiries_direct",
+    "arguments": {
+      "limit": 10
+    }
+  }
+}

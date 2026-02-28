@@ -3,15 +3,21 @@ import { API } from '@/lib/api-config';
 
 interface PaginatedResponse {
   data: Inquiry[];
-  total: number;
+  totalCount: number;
 }
 
-export async function createInquiry(inquiryData: Partial<Inquiry>): Promise<void> {
+export async function createInquiry(inquiryData: Partial<Inquiry>, userId?: string): Promise<void> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (userId) {
+    headers['X-User-Id'] = userId;
+  }
+
   const response = await fetch(`${API.inquiries}/inquiries/submit`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(inquiryData),
   });
 
@@ -22,11 +28,21 @@ export async function createInquiry(inquiryData: Partial<Inquiry>): Promise<void
   return;
 }
 
-export const getPaginatedInquiries = async (pageIndex: number, pageSize: number): Promise<PaginatedResponse> => {
+export const getPaginatedInquiries = async (
+  pageIndex: number,
+  pageSize: number,
+  userId?: string
+): Promise<PaginatedResponse> => {
+  const headers: HeadersInit = {};
+  if (userId) {
+    headers['X-User-Id'] = userId;
+  }
+
   const response = await fetch(
-    `${API.inquiries}/inquiries?page=${pageIndex + 1}&limit=${pageSize}`
+    `${API.inquiries}/inquiries?page=${pageIndex + 1}&limit=${pageSize}`,
+    { headers }
   );
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch inquiries');
   }

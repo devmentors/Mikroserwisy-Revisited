@@ -18,15 +18,27 @@ public class ListInquiriesHandler : IQueryHandler<ListInquiries, InquiriesListDt
 
     public async Task<InquiriesListDto> HandleAsync(ListInquiries query, CancellationToken cancellationToken = default)
     {
-        var (page, limit) = query;
+        var (page, limit, userId) = query;
+        if (userId.HasValue is false)
+        {
+            throw new InvalidOperationException("Unauthorized!");
+        }
+        
         if (limit > 25)
         {
             limit = 25;
         }
 
-        var count = await _dbContext.Inquiries.CountAsync(cancellationToken);
+        var dbQuery = _dbContext.Inquiries.AsQueryable();
 
-        var data = await _dbContext.Inquiries
+        if (userId.HasValue)
+        {
+            dbQuery = dbQuery.Where(x => x.UserId == userId.Value);
+        }
+
+        var count = await dbQuery.CountAsync(cancellationToken);
+
+        var data = await dbQuery
             .OrderByDescending(x => x.CreatedAt)
             .Skip((page - 1) * limit)
             .Take(limit)

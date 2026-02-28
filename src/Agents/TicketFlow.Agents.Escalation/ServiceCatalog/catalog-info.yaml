@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: escalation-agent
+  description: Autonomous AI agent for ticket escalation with A2A protocol
+  tags:
+    - dotnet
+    - ai-agent
+    - a2a
+    - autonomous
+spec:
+  type: service
+  lifecycle: production
+  owner: group:ticketflow-ai-team
+  system: ticketflow
+  dependsOn:
+    - component:tickets-mcp-server
+    - component:communication-service

@@ -1,4 +1,4 @@
-import { faCircle, faCircleExclamation, faTriangleExclamation, faFire, faCheckCircle, faSpinner, faPlusCircle, faLock, faQuestionCircle } from "@fortawesome/free-solid-svg-icons"
+import { faCircle, faCircleExclamation, faTriangleExclamation, faFire, faCheckCircle, faSpinner, faPlusCircle, faLock, faQuestionCircle, faHourglassHalf } from "@fortawesome/free-solid-svg-icons"
 import { SeverityLevel, TicketStatus } from '@/app/types/enums'
 import { ticketStatusTranslations, ticketSeverityTranslations } from "@/app/lib/translations"
 
@@ -61,10 +61,15 @@ export const statusConfig = {
     variant: "secondary",
     icon: faCheckCircle
   },
-  [TicketStatus.Blocked]: { 
-    label: ticketStatusTranslations[TicketStatus.Blocked], 
+  [TicketStatus.Blocked]: {
+    label: ticketStatusTranslations[TicketStatus.Blocked],
     variant: "destructive",
     icon: faLock
+  },
+  [TicketStatus.WaitingForCapacity]: {
+    label: ticketStatusTranslations[TicketStatus.WaitingForCapacity],
+    variant: "outline",
+    icon: faHourglassHalf
   },
 } as const; 
 
@@ -81,6 +86,8 @@ function mapApiStatusToEnum(status: string): TicketStatus {
       return TicketStatus.Resolved;
     case "Blocked":
       return TicketStatus.Blocked;
+    case "WaitingForCapacity":
+      return TicketStatus.WaitingForCapacity;
     default:
       return TicketStatus.Unknown;
   }
