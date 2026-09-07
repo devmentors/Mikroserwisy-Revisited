@@ -24,9 +24,18 @@ internal sealed class TranslationCompletedHandler(ITicketsRepository repository,
             return;
         }
         
-        ticket.SetTranslation(message.TranslatedText);
+        if (!ticket.SetTranslation(message.TranslatedText))
+        {
+            logger.LogInformation($"Ticket {message.ReferenceId} already carries this translation. Ignoring duplicate.");
+
+            return;
+        }
+
+        // Only reached for a translation that actually changed something. Doing this
+        // unconditionally dragged a ticket an agent had already moved on back to
+        // BeforeQualification every time a duplicate arrived.
         ticket.SetBeforeQualification();
-        
+
         await repository.UpdateAsync(ticket, cancellationToken);
         logger.LogInformation($"Ticket {message.ReferenceId} was found. Updated with translation.");
     }
