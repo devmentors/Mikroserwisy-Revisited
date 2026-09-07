@@ -22,7 +22,8 @@ internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILan
         var inquiry = new Inquiry(personToken, title, description, categoryParsed);
 
         await repository.AddAsync(inquiry, cancellationToken);
-        var languageCode = await languageDetector.GetTextLanguageCode(inquiry.Description, cancellationToken);
+        var detection = await languageDetector.DetectAsync(inquiry.Description, cancellationToken);
+        var languageCode = detection.CodeOrUndetermined;
 
         if (CourseUtils.FeatureFlags.UseSharedContracts)
         {
