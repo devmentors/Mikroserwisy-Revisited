@@ -12,4 +12,8 @@
       <ProjectReference Include="..\..\SystemMetrics\TicketFlow.Services.SystemMetrics.Generator\TicketFlow.Services.SystemMetrics.Generator.csproj" />
     </ItemGroup>
     
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="TicketFlow.Services.Inquiries.IntegrationTests" />
+    </ItemGroup>
 </Project>
