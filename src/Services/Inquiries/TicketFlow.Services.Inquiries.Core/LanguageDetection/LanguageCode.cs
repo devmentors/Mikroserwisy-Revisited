@@ -54,6 +54,13 @@ public readonly record struct LanguageCode
 
         if (lastColon >= 0)
         {
+            // The label has to be an actual label. Accepting any prefix let
+            // "I cannot determine: Polish" through as a confident "pl".
+            if (!IsLabel(candidate[..lastColon]))
+            {
+                return false;
+            }
+
             value = value[(lastColon + 1)..];
         }
 
@@ -79,6 +86,23 @@ public readonly record struct LanguageCode
         languageCode = default;
         return false;
     }
+
+    /// <summary>
+    /// Whether the text before a colon is a label introducing a value, rather than prose that
+    /// happens to end in one. Only a closed set of label words is accepted; anything else,
+    /// including every way a model phrases a refusal, is rejected.
+    /// </summary>
+    private static bool IsLabel(string prefix)
+    {
+        var tokens = Tokenize(prefix).ToArray();
+
+        return tokens.Length > 0 && tokens.All(LabelWords.Contains);
+    }
+
+    private static readonly HashSet<string> LabelWords = new(StringComparer.Ordinal)
+    {
+        "the", "is", "language", "languagecode", "code", "iso", "detected", "result", "answer"
+    };
 
     private static IEnumerable<string> Tokenize(string candidate)
     {

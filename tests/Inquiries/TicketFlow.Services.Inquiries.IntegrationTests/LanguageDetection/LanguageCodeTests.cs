@@ -33,6 +33,9 @@ public class LanguageCodeTests
     // Prose is rejected outright: a trailing language name must not read as a confident answer.
     [InlineData("I cannot determine the language; perhaps Polish")]
     [InlineData("Detected language is probably German")]
+    // A refusal with a colon must not read as a label introducing a value.
+    [InlineData("I cannot determine: Polish")]
+    [InlineData("Unable to classify: German")]
     // The invariant culture reports "iv", which is not an ISO 639-1 code.
     [InlineData("iv")]
     public void TryParse_rejects_anything_it_cannot_map_to_a_language(string? candidate)
