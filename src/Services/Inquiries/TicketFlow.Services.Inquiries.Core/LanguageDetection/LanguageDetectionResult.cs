@@ -12,13 +12,31 @@ public enum LanguageDetectionOutcome
     Failed
 }
 
-public sealed record LanguageDetectionResult(LanguageCode? Code, LanguageDetectionOutcome Outcome)
+/// <summary>
+/// The outcome and the code are paired at construction and cannot be recombined: there is no
+/// public constructor and no <c>with</c> expression, so a Detected result always carries a code
+/// and an Unrecognized or Failed one never does.
+/// </summary>
+public sealed record LanguageDetectionResult
 {
-    public static readonly LanguageDetectionResult Unrecognized = new(null, LanguageDetectionOutcome.Unrecognized);
+    private LanguageDetectionResult(LanguageCode? code, LanguageDetectionOutcome outcome)
+    {
+        Code = code;
+        Outcome = outcome;
+    }
 
-    public static readonly LanguageDetectionResult Failed = new(null, LanguageDetectionOutcome.Failed);
+    public LanguageCode? Code { get; }
 
-    public static LanguageDetectionResult Detected(LanguageCode code) => new(code, LanguageDetectionOutcome.Detected);
+    public LanguageDetectionOutcome Outcome { get; }
+
+    public static readonly LanguageDetectionResult Unrecognized =
+        new(null, LanguageDetectionOutcome.Unrecognized);
+
+    public static readonly LanguageDetectionResult Failed =
+        new(null, LanguageDetectionOutcome.Failed);
+
+    public static LanguageDetectionResult Detected(LanguageCode code)
+        => new(code, LanguageDetectionOutcome.Detected);
 
     /// <summary>Code to persist and publish. Undetermined when nothing could be established.</summary>
     public string CodeOrUndetermined => Code?.Value ?? LanguageCode.UndeterminedValue;

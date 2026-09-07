@@ -41,26 +41,25 @@ public readonly record struct LanguageCode
             return false;
         }
 
-        var tokens = Tokenize(candidate).ToArray();
+        // Fail closed. The model is told to answer with the bare code, so only two shapes are
+        // accepted: a single token ("pl", "Polish"), or a label/value line whose value after the
+        // last colon is a single token ("The language code is: pl").
+        //
+        // Free-running prose is rejected outright. Scanning its tokens is what made
+        // "I cannot determine the language; perhaps Polish" read as a confident "pl", and
+        // scanning them the other way round made "The language code is: pl" read as "is" --
+        // a real ISO 639-1 code for Icelandic.
+        var value = candidate;
+        var lastColon = value.LastIndexOf(':');
 
-        // A bare answer ("pl", "Polish") is the common case and the only unambiguous one.
-        if (tokens.Length == 1 && TryMatch(tokens[0], out languageCode))
+        if (lastColon >= 0)
         {
-            return true;
+            value = value[(lastColon + 1)..];
         }
 
-        // Otherwise scan from the end: models put the answer last ("The language code is: pl").
-        // Scanning forward would match "is" -- a real ISO 639-1 code for Icelandic -- in that
-        // very sentence, which is exactly the class of bug this parser exists to stop.
-        for (var i = tokens.Length - 1; i >= 0; i--)
-        {
-            if (TryMatch(tokens[i], out languageCode))
-            {
-                return true;
-            }
-        }
+        var tokens = Tokenize(value).ToArray();
 
-        return false;
+        return tokens.Length == 1 && TryMatch(tokens[0], out languageCode);
     }
 
     private static bool TryMatch(string token, out LanguageCode languageCode)
@@ -107,6 +106,12 @@ public readonly record struct LanguageCode
 
         foreach (var culture in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
         {
+            if (string.IsNullOrEmpty(culture.Name))
+            {
+                // The invariant culture reports "iv", which is not an ISO 639-1 code.
+                continue;
+            }
+
             var code = culture.TwoLetterISOLanguageName;
 
             if (code.Length == 2)
@@ -128,6 +133,11 @@ public readonly record struct LanguageCode
 
         foreach (var culture in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
         {
+            if (string.IsNullOrEmpty(culture.Name))
+            {
+                continue;
+            }
+
             var code = culture.TwoLetterISOLanguageName;
             var englishName = culture.EnglishName;
             var parenthesis = englishName.IndexOf('(');
