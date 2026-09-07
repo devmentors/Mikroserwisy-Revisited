@@ -42,6 +42,18 @@ public class TicketTranslationTests
         ticket.TranslatedDescription.Should().Be("I am unable to sign in.");
     }
 
+    [Fact]
+    public void A_redelivered_translation_after_resolution_is_still_a_no_op()
+    {
+        var ticket = NewTicket();
+        ticket.SetTranslation("I cannot log in.");
+        ticket.Resolve("Password reset.");
+
+        var changed = ticket.SetTranslation("I cannot log in.");
+
+        changed.Should().BeFalse();
+    }
+
     private static Ticket NewTicket()
         => new(Guid.NewGuid(), "person-token", "Nie moge sie zalogowac", "Mam problem z logowaniem.",
             TicketCategory.Other, "pl");

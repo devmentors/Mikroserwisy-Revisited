@@ -56,14 +56,17 @@ public sealed class Ticket
     /// </summary>
     public bool SetTranslation(string translatedDescription)
     {
-        if (Status is TicketStatus.Resolved)
-        {
-            throw new TicketFlowException("Cannot set translation after the ticket is resolved.");
-        }
-
+        // Duplicate check first. A translation can be applied and the ticket resolved before
+        // RabbitMQ redelivers the same message; throwing on that redelivery would fail a handler
+        // whose work is already done. A *different* translation after resolution is still an error.
         if (string.Equals(TranslatedDescription, translatedDescription, StringComparison.Ordinal))
         {
             return false;
+        }
+
+        if (Status is TicketStatus.Resolved)
+        {
+            throw new TicketFlowException("Cannot set translation after the ticket is resolved.");
         }
 
         TranslatedDescription = translatedDescription;
