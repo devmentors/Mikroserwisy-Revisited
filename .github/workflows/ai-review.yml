@@ -35,7 +35,11 @@ jobs:
 
       - name: Recenzja
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Token z subskrypcji Pro/Max (claude setup-token), a nie klucz API
+          # z console.anthropic.com — to dwa różne rozliczenia. CLI czyta tę
+          # zmienną natywnie, więc działa niezależnie od nazw wejść akcji.
+          # Jeśli wolisz płacić za tokeny osobno, podmień na ANTHROPIC_API_KEY.
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         uses: anthropics/claude-code-action@v1
         with:
           claude_args: >-
