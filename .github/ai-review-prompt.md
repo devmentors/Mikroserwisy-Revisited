@@ -73,31 +73,27 @@ Only after those six passes, collect the results.
 
 ## Output format
 
-Write the review in **Polish** — the audience is a Polish-speaking team. Keep code,
-file paths, identifiers and product names verbatim in English. (Change this line to
-switch the output language; everything else here is language-independent.)
-
 For every finding:
 
 ```
 ### <file>:<line> — <one sentence, what is wrong>
 
-**Kategoria:** poprawność | bezpieczeństwo | prywatność | stabilność | wydajność | kontrakt
-**Waga:** krytyczna | poważna | drobna
-**Pewność:** wysoka | średnia | niska
+**Category:** correctness | security | privacy | stability | performance | contract
+**Severity:** critical | major | minor
+**Confidence:** high | medium | low
 
-**Scenariusz:** <concrete input or sequence of events> → <what happens> →
+**Scenario:** <concrete input or sequence of events> → <what happens> →
 <what should happen>
 
-**Naprawa:** <the smallest change that removes it — code, if it fits in a few lines>
+**Fix:** <the smallest change that removes it — code, if it fits in a few lines>
 ```
 
 Sort by severity, worst first. Then add two sections:
 
-**Czego nie zweryfikowałem** — places where you would have had to see code outside
-the diff, run it, or know production data. Be specific.
+**Not verified** — places where you would have had to see code outside the diff,
+run it, or know production data. Be specific.
 
-**Jednozdaniowy werdykt** — is this ready to merge, and if not, what is the one
+**Verdict** — one sentence: is this ready to merge, and if not, what is the one
 blocking thing.
 
 ## Machine-readable output (when a workflow runs you)
@@ -112,9 +108,9 @@ do not report it as an inline comment — leave it in the summary.
   {
     "path": "src/Services/.../File.cs",
     "line": 62,
-    "category": "prywatność",
-    "severity": "poważna",
-    "confidence": "wysoka",
+    "category": "privacy",
+    "severity": "major",
+    "confidence": "high",
     "title": "One sentence, what is wrong.",
     "scenario": "At input X the code does Y, it should do Z.",
     "fix": "The smallest change that removes it."
