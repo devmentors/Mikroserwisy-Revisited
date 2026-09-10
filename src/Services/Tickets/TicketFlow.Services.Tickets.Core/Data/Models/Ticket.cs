@@ -47,15 +47,29 @@ public sealed class Ticket
         _versionAlreadyChanged = true;
     }
 
-    public void SetTranslation(string translatedDescription)
+    /// <summary>
+    /// Applies a translation. Returns false when the ticket already carries exactly this
+    /// translation, so a redelivered or duplicated message is a no-op rather than another
+    /// version bump. Inquiries publishes both RequestTranslationV1 and V2 for the same
+    /// inquiry, so two TranslationCompleted messages for one ticket is the normal case,
+    /// not an edge case.
+    /// </summary>
+    public bool SetTranslation(string translatedDescription)
     {
         if (Status is TicketStatus.Resolved)
         {
             throw new TicketFlowException("Cannot set translation after the ticket is resolved.");
         }
-        
+
+        if (string.Equals(TranslatedDescription, translatedDescription, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
         TranslatedDescription = translatedDescription;
         IncreaseVersion();
+
+        return true;
     }
 
     public void SetInternalNotes(string internalNotes)
