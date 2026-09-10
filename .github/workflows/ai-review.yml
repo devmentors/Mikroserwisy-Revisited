@@ -1,0 +1,49 @@
+name: AI review
+
+# Recenzent uruchamiany na żądanie, nie na każdy push — inaczej rachunek
+# za tokeny rośnie tak samo jak rachunek za review u dostawcy SaaS.
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Numer pull requesta do przejrzenia
+        required: true
+  pull_request:
+    types: [labeled]
+
+jobs:
+  review:
+    # Na PR-ze odpala się tylko po nadaniu etykiety "ai-review".
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'ai-review'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ustal numer PR-a
+        id: pr
+        run: echo "number=${{ github.event.inputs.pr || github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Pobierz diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr diff ${{ steps.pr.outputs.number }} --repo ${{ github.repository }} > /tmp/pr.diff
+
+      - name: Recenzja
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt_file: .github/ai-review-prompt.md
+          # Diff wjeżdża jako dane, nie jako część instrukcji — dokładnie z tego
+          # samego powodu, dla którego tekst użytkownika nie należy do promptu.
+          input_file: /tmp/pr.diff
+          output_file: /tmp/review.md
+
+      - name: Wklej recenzję jako komentarz
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment ${{ steps.pr.outputs.number }} --repo ${{ github.repository }} --body-file /tmp/review.md
