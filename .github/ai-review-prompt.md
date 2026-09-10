@@ -93,3 +93,27 @@ diffa, uruchomić to, albo znać dane produkcyjne. Bądź konkretny.
 
 **Jednozdaniowy werdykt** — czy to jest gotowe do merge'a, i jeśli nie, to co jest
 jedną rzeczą blokującą.
+
+## Format maszynowy (gdy uruchamia Cię workflow)
+
+Poza recenzją w Markdownie zapisz plik `findings.json` — tablicę obiektów. To
+z niego powstają komentarze przypięte do linii, więc `path` i `line` muszą
+wskazywać **linię obecną w diffie po stronie dodanej (RIGHT)**. Jeśli nie potrafisz
+wskazać takiej linii, nie zgłaszaj tego jako komentarza inline — zostaw w podsumowaniu.
+
+```json
+[
+  {
+    "path": "src/Services/.../Plik.cs",
+    "line": 62,
+    "category": "prywatność",
+    "severity": "poważna",
+    "confidence": "wysoka",
+    "title": "Jedno zdanie, co jest nie tak.",
+    "scenario": "Przy wejściu X kod robi Y, powinien Z.",
+    "fix": "Najmniejsza zmiana, która to usuwa."
+  }
+]
+```
+
+Pusta tablica jest poprawną odpowiedzią.
