@@ -1,4 +1,4 @@
-<a href="https://mikroserwisy-revisited.pl"><img width="1620" height="260" alt="mikro_revisited_lg_v2" src="https://github.com/user-attachments/assets/e81f0e0d-af13-4676-a9c1-01e40044f511" /></a>
+<a href="https://mikroserwisy-revisited.pl"><img width="1620" height="260" alt="mikro_revisited_lg_v2" src="./img/mikro_rev_large_banner" /></a>
 
 # Mikroserwisy: Revisited
 
@@ -84,5 +84,5 @@ Repozytorium obejmuje material z 9 modulow tematycznych:
 
 
 ## Wsparcie
-<a href="https://devmentors.circle.so"><img width="1620" height="260" alt="circle_support" src="https://github.com/user-attachments/assets/4f4bce99-e0c5-42e3-9867-f378b61b8826" /></a>
+<a href="https://devmentors.circle.so"><img width="1620" height="260" alt="circle_support" src="./img/circle_banner" /></a>
 
