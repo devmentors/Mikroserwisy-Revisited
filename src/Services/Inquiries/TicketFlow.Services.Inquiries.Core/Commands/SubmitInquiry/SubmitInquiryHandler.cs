@@ -12,7 +12,6 @@ namespace TicketFlow.Services.Inquiries.Core.Commands.SubmitInquiry;
 internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILanguageDetector languageDetector,
     IMessagePublisher messagePublisher, IPersonalInfoVaultClient vaultClient, ILogger<SubmitInquiryHandler> logger) : ICommandHandler<SubmitInquiry>
 {
-    private const string EnglishLanguageCode = "en";
     public async Task HandleAsync(SubmitInquiry command, CancellationToken cancellationToken = default)
     {
         var (name, email, title, description, category) = command;
@@ -53,7 +52,7 @@ internal sealed class SubmitInquiryHandler(IInquiriesRepository repository, ILan
         
         logger.LogInformation($"Inquiry with id: {inquiry.Id} submitted successfully.");
         
-        if (languageCode is not EnglishLanguageCode)
+        if (TranslationPolicy.ShouldTranslate(detection))
         {
             var requestTranslationV1 = new RequestTranslationV1(inquiry.Description, inquiry.Id);
             var requestTranslationV2 = new RequestTranslationV2(inquiry.Description, languageCode, inquiry.Id);
