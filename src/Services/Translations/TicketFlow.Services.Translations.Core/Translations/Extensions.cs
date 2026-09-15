@@ -1,4 +1,5 @@
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -16,7 +17,9 @@ internal static class Extensions
             var options = sp.GetRequiredService<IOptions<OpenAIOptions>>();
 
             return options.Value.Enabled
-                ? new OpenAiTranslationsService(sp.GetRequiredService<IChatClient>())
+                ? new OpenAiTranslationsService(
+                    sp.GetRequiredService<IChatClient>(),
+                    sp.GetRequiredService<ILogger<OpenAiTranslationsService>>())
                 : new NoopTranslationsService();
         });
         return services;
