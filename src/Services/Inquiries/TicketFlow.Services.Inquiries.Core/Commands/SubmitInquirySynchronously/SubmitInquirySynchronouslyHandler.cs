@@ -28,7 +28,8 @@ public class SubmitInquirySynchronouslyHandler(
 
         await repository.AddAsync(inquiry, cancellationToken);
 
-        var languageCode = await languageDetector.GetTextLanguageCode(inquiry.Description, cancellationToken);
+        var detection = await languageDetector.DetectAsync(inquiry.Description, cancellationToken);
+        var languageCode = detection.CodeOrUndetermined;
         var translatedDescription = string.Empty;
 
         if (languageCode is not EnglishLanguageCode)
