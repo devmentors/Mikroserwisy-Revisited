@@ -1,0 +1,73 @@
+# CodeRabbit configuration for TicketFlow.
+#
+# This repository is public, so it qualifies for the CodeRabbit Open Source plan
+# (full Team-tier features at no cost). On a private repository the same setup
+# requires a paid seat -- the free tier only produces PR summaries there.
+#
+# Schema reference: https://docs.coderabbit.ai/reference/yaml-template
+language: en-US
+early_access: false
+
+reviews:
+  # "chill" keeps CodeRabbit off style nits. Roslyn analyzers and .editorconfig
+  # own formatting; a reviewer that repeats them just trains people to click Resolve.
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - master
+      - "feat/.*"
+
+  # Generated and vendored output is noise, and every file here counts against the
+  # per-review file budget.
+  path_filters:
+    - "!**/bin/**"
+    - "!**/obj/**"
+    - "!**/Migrations/**"
+    - "!**/*.Designer.cs"
+    - "!**/*.g.cs"
+    - "!**/.yarn/**"
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/*.lock"
+    - "!**/yarn.lock"
+    - "!**/package-lock.json"
+
+  path_instructions:
+    - path: "src/Services/**/*.cs"
+      instructions: >-
+        This is a microservice codebase. Services communicate over RabbitMQ messages and
+        HTTP clients, never by sharing a database. Flag any change that reaches across a
+        service boundary in a way other than a message contract or an HTTP client.
+        Message contracts are versioned (V1, V2 suffixes) on purpose -- do not suggest
+        collapsing them into one. Every message handler must be safe to run twice: point
+        out state changes that are not idempotent.
+    - path: "src/Services/**/LanguageDetection/**/*.cs"
+      instructions: >-
+        This code turns free-form language model output into a decision. Treat every model
+        response as untrusted and possibly malformed. Flag: values used without validation,
+        missing timeouts, exceptions that escape into the caller's critical path, and any
+        place where "detection failed" is treated the same as a successfully detected value.
+    - path: "src/Services/**/Translations/**/*.cs"
+      instructions: >-
+        User-submitted text is interpolated into model prompts here. Flag any prompt that
+        mixes instructions and untrusted data in the same message, missing timeouts, and
+        unvalidated model output being persisted or published.
+    - path: "tests/**/*.cs"
+      instructions: >-
+        Flag tests that assert nothing meaningful, that assert on mock call counts instead
+        of behaviour, or that would still pass if the production code were deleted.
+
+  tools:
+    github-checks:
+      enabled: true
+
+chat:
+  auto_reply: true
